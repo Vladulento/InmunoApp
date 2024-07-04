@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992802969618",
+    "project_id": "inmunoapp-c8000",
+    "storage_bucket": "inmunoapp-c8000.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992802969618:android:afc7de85b3889a4f5aa0cb",
+        "android_client_info": {
+          "package_name": "com.uc3m.InmunoApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmd1V0jLcvyGB5mS4oCZ1T68OHfHzj9MU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

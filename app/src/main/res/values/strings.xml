@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">InmunoApp</string>
+
+    // Login Activity
+
+    <string name="next">Siguiente</string>
+    <string name="logoDescription">Logo InmunoApp</string>
+    <string name="loginEmail">Introduzca su correo electrónico</string>
+    <string name="loginPassword">Introduzca su contraseña</string>
+    <string name="noAccount">¿No tienes cuenta todavía?</string>
+    <string name="seePassword">Mostrar</string>
+    <string name="resetPassword">¿Has olvidado tu contraseña?</string>
+
+    //Register Activity
+
+    <string name="register">Registrarse</string>
+    <string name="registro">Registro</string>
+    <string name="form">Completa el siguiente formulario</string>
+    <string name="save">Guardar</string>
+    <string name="backLogin">Ya tengo una cuenta</string>
+    <string name="registerName">Nombre y apellidos</string>
+    <string name="registerEmail">Correo electrónico</string>
+    <string name="registerPassword">Contraseña</string>
+    <string name="caractersPassword">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="registerPassword2">Repetir contraseña</string>
+    <string name="patient">Paciente</string>
+    <string name="doctor">Médico</string>
+    <string name="rol">Seleccione su rol:</string>
+
+    //User Fragmento
+
+    <string name="welcome">Bienvenido a InmunoApp,</string>
+    <string name="selectLanguage">Escoger idioma</string>
+    <string name="spanish">Español</string>
+    <string name="english">Inglés</string>
+    <string name="selectTheme">Escoger tema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+    <string name="changePassword">Cambiar contraseña</string>
+    <string name="account">Gestionar cuenta</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="deleteAccount">Eliminar cuenta</string>
+    <string name="personalAccount">Personalización cuenta</string>
+
+
+</resources>
