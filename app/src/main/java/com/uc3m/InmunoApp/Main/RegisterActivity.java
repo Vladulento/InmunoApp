@@ -26,7 +26,7 @@ import com.uc3m.InmunoApp.R;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText nameTextView, emailTextView, passwordTextView, confirmPasswordTextView;
+    private EditText nameTextView, emailTextView, numberTextView, passwordTextView, confirmPasswordTextView;
     private RadioGroup rolRadioGroup;
     private FirebaseAuth mAuth;
 
@@ -40,6 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
         // Initialize views
         nameTextView = findViewById(R.id.regName);
         emailTextView = findViewById(R.id.regEmail);
+        numberTextView = findViewById(R.id.regNumber);
         passwordTextView = findViewById(R.id.regPassword);
         confirmPasswordTextView = findViewById(R.id.regPassword2);
         rolRadioGroup = findViewById(R.id.regRol);
@@ -59,8 +60,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Check every field
 
-        String email, password, name, confirmPassword;
+        String email, password, name, confirmPassword, number;
         email = emailTextView.getText().toString();
+        number = numberTextView.getText().toString();
         password = passwordTextView.getText().toString();
         name = nameTextView.getText().toString();
         confirmPassword = confirmPasswordTextView.getText().toString();
@@ -72,6 +74,15 @@ public class RegisterActivity extends AppCompatActivity {
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(getApplicationContext(), "Introduzca un correo electrónico válido", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (TextUtils.isEmpty(number)) {
+            Toast.makeText(getApplicationContext(), "Introduzca su número de teléfono", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (number.length() != 9) {
+            Toast.makeText(getApplicationContext(), "Introduzca un número de teléfono válido", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -132,6 +143,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
     }
+
     private void openLoginActivity() {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);

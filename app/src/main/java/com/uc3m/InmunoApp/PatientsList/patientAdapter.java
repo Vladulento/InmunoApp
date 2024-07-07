@@ -1,4 +1,4 @@
-package com.uc3m.InmunoApp.PatientsList;  //
+package com.uc3m.InmunoApp.PatientsList;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +45,7 @@ public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserView
 
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameTextView;
+        private final TextView genderTextView;
         private final TextView ageTextView;
         private final TextView heightTextView;
         private final TextView weightTextView;
@@ -52,6 +53,7 @@ public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserView
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.nameTextView);
+            genderTextView = itemView.findViewById(R.id.genderTextView);
             ageTextView = itemView.findViewById(R.id.ageTextView);
             heightTextView = itemView.findViewById(R.id.heightTextView);
             weightTextView = itemView.findViewById(R.id.weightTextView);
@@ -59,8 +61,9 @@ public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserView
 
         public void bind(final Patient user, final OnItemClickListener listener) {
             nameTextView.setText(user.getName());
+            genderTextView.setText(user.getGender());
             ageTextView.setText("Edad: " + user.getAge());
-            heightTextView.setText("Estatura: " + user.getHeight() + " m");
+            heightTextView.setText("Altura: " + user.getHeight() + " m");
             weightTextView.setText("Peso: " + user.getWeight() + " kg");
 
             itemView.setOnClickListener(v -> listener.onItemClick(user));

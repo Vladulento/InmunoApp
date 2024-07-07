@@ -20,6 +20,7 @@
     <string name="backLogin">Ya tengo una cuenta</string>
     <string name="registerName">Nombre y apellidos</string>
     <string name="registerEmail">Correo electrónico</string>
+    <string name="registerNumber">Número de teléfono</string>
     <string name="registerPassword">Contraseña</string>
     <string name="caractersPassword">La contraseña debe tener al menos 6 caracteres</string>
     <string name="registerPassword2">Repetir contraseña</string>

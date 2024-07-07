@@ -33,8 +33,8 @@ public class PatientsFragment extends Fragment {
 
         // Add the users to the list
 
-        userList.add(new Patient("Juan Perez", 25, 1.75, 70));
-        userList.add(new Patient("Maria Gomez", 30, 1.60, 60));
+        userList.add(new Patient("Manuel", "Hombre", 25, 1.75, 70));
+        userList.add(new Patient("Julia", "Mujer", 30, 1.60, 60));
 
         // Handle the click on the users
 

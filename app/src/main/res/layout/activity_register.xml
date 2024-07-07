@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="@string/registro"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="50dp"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="50sp"/>
@@ -44,6 +44,16 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:hint="@string/registerEmail" />
+
+    <EditText
+        android:id="@+id/regNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:hint="@string/registerNumber" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -138,7 +148,7 @@
         android:id="@+id/registerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="25dp"
         android:layout_gravity="center"
         android:backgroundTint="@color/bkgButton"
         android:textColor="@color/white"
