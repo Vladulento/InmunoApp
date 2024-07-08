@@ -25,6 +25,7 @@
     <string name="caractersPassword">La contraseña debe tener al menos 6 caracteres</string>
     <string name="registerPassword2">Repetir contraseña</string>
     <string name="patient">Paciente</string>
+    <string name="user">Usuario</string>
     <string name="doctor">Médico</string>
     <string name="rol">Seleccione su rol:</string>
 
@@ -37,10 +38,10 @@
     <string name="selectTheme">Escoger tema</string>
     <string name="light">Claro</string>
     <string name="dark">Oscuro</string>
-    <string name="changePassword">Cambiar contraseña</string>
+    <string name="changePassword">Cambiar mi contraseña</string>
     <string name="account">Gestionar cuenta</string>
     <string name="logout">Cerrar sesión</string>
-    <string name="deleteAccount">Eliminar cuenta</string>
+    <string name="deleteAccount">Borrar mi cuenta</string>
     <string name="personalAccount">Personalización cuenta</string>
 
 
