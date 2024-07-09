@@ -39,10 +39,13 @@
     <string name="light">Claro</string>
     <string name="dark">Oscuro</string>
     <string name="changePassword">Cambiar mi contraseña</string>
+    <string name="changeEmail">Cambiar mi correo electrónico</string>
     <string name="account">Gestionar cuenta</string>
     <string name="logout">Cerrar sesión</string>
     <string name="deleteAccount">Borrar mi cuenta</string>
     <string name="personalAccount">Personalización cuenta</string>
+    <string name="current_email">Correo electrónico actual: %1$s</string>
+    <string name="verification_email_sent">Correo de verificación enviado a %1$s</string>
 
 
 </resources>
