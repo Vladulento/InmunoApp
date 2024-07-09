@@ -40,13 +40,18 @@ public class UserFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View  view = inflater.inflate(R.layout.fragment_user, container, false);
+
+        // Elementos de la vista
 
         TextView textViewUser = view.findViewById(R.id.text_user);
         Button logoutButton = view.findViewById(R.id.logoutButton);
         Button passwordButton = view.findViewById(R.id.changePasswrdButton);
         Button deleteButton = view.findViewById(R.id.deleteButton);
         Button emailButton = view.findViewById(R.id.changeEmail);
+
+        // Listeners de los botones
 
         logoutButton.setOnClickListener(v -> logoutUser());
         deleteButton.setOnClickListener(v -> deleteUser());
@@ -56,10 +61,8 @@ public class UserFragment extends Fragment {
         //Base de datos en tiempo real en vez de SharedPreferences
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
-        String name = sharedPreferences.getString("userName", "Sin información");
+        String name = sharedPreferences.getString("userName", String.valueOf(R.string.noInfo));
         //String rol = sharedPreferences.getString("userRol", "nada");
-
-        //Introducir vista del fragmento
 
         textViewUser.setText(name);
 
@@ -78,9 +81,9 @@ public class UserFragment extends Fragment {
     private void deleteUser(){
         // Crear una alerta de confirmación
         new AlertDialog.Builder(getActivity())
-                .setTitle("Confirmar Borrado de Cuenta")
-                .setMessage("¿Estás seguro de que deseas borrar tu cuenta? Esta acción no se puede deshacer.")
-                .setPositiveButton("Sí", (dialog, which) -> {
+                .setTitle(R.string.confirmDeleteAccount)
+                .setMessage(R.string.deleteAccountQuestion)
+                .setPositiveButton(R.string.yes, (dialog, which) -> {
                     // Proceder con el borrado de la cuenta
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     if (user != null) {
@@ -94,18 +97,18 @@ public class UserFragment extends Fragment {
                                         requireActivity().finish();
                                     } else {
                                         // Manejar el error
-                                        Toast.makeText(getActivity(), "Error al borrar la cuenta: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getActivity(), R.string.errorDeleteAccount + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 });
                     }
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton(R.string.no, null)
                 .show();
     }
 
     private void changePassword(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Cambio de contraseña");
+        builder.setTitle(R.string.titleChangePassword);
 
         // Crear el layout para el diálogo
         LinearLayout mainLayout = new LinearLayout(getActivity());
@@ -117,7 +120,7 @@ public class UserFragment extends Fragment {
         newPasswordLayout.setOrientation(LinearLayout.HORIZONTAL);
 
         final EditText newPasswordInput = new EditText(getActivity());
-        newPasswordInput.setHint("Nueva contraseña");
+        newPasswordInput.setHint(R.string.newPassword);
         newPasswordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         final CheckBox showNewPasswordCheckBox = new CheckBox(getActivity());
@@ -140,7 +143,7 @@ public class UserFragment extends Fragment {
         confirmPasswordLayout.setOrientation(LinearLayout.HORIZONTAL);
 
         final EditText confirmPasswordInput = new EditText(getActivity());
-        confirmPasswordInput.setHint("Confirmar");
+        confirmPasswordInput.setHint(R.string.confirm);
         confirmPasswordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         final CheckBox showConfirmPasswordCheckBox = new CheckBox(getActivity());
@@ -175,7 +178,7 @@ public class UserFragment extends Fragment {
 
         builder.setView(mainLayout);
 
-        builder.setPositiveButton("Cambiar", (dialogInterface, i) -> {
+        builder.setPositiveButton(R.string.change, (dialogInterface, i) -> {
             String newPassword = newPasswordInput.getText().toString().trim();
             if (!newPassword.isEmpty()) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -183,18 +186,18 @@ public class UserFragment extends Fragment {
                     user.updatePassword(newPassword)
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(getActivity(), "Contraseña cambiada con éxito", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), R.string.passwordChanged, Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getActivity(), "Escoja otra contraseña y revise los campos", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), R.string.passwordNotChanged, Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }
             } else {
-                Toast.makeText(getActivity(), "Las contraseñas no coinciden o están vacias", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.errorChangePassword, Toast.LENGTH_SHORT).show();
             }
         });
 
-        builder.setNegativeButton("Cancelar", null);
+        builder.setNegativeButton(R.string.cancel, null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -203,12 +206,12 @@ public class UserFragment extends Fragment {
     private void changeEmail(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            Toast.makeText(getActivity(), "Usuario no registrado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.userNotRegistered, Toast.LENGTH_SHORT).show();
             return;
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Cambio de correo electrónico");
+        builder.setTitle(R.string.changeEmailTitle);
 
         // Crear el layout para el diálogo
         LinearLayout mainLayout = new LinearLayout(getActivity());
@@ -229,7 +232,7 @@ public class UserFragment extends Fragment {
 
         // Crear el primer EditText para el nuevo email
         final EditText newEmailInput = new EditText(getActivity());
-        newEmailInput.setHint("Introduce tu nuevo email");
+        newEmailInput.setHint(R.string.writeNewEmail);
         newEmailInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         newEmailInput.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -237,7 +240,7 @@ public class UserFragment extends Fragment {
 
         // Crear el segundo EditText para confirmar el nuevo email
         final EditText confirmEmailInput = new EditText(getActivity());
-        confirmEmailInput.setHint("Confirma tu nuevo email");
+        confirmEmailInput.setHint(R.string.confirmNewEmail);
         confirmEmailInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         confirmEmailInput.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -245,7 +248,7 @@ public class UserFragment extends Fragment {
 
         builder.setView(mainLayout);
 
-        builder.setPositiveButton("Change", (dialogInterface, i) -> {
+        builder.setPositiveButton(R.string.change, (dialogInterface, i) -> {
             String newEmail = newEmailInput.getText().toString().trim();
             String confirmEmail = confirmEmailInput.getText().toString().trim();
 
@@ -260,16 +263,16 @@ public class UserFragment extends Fragment {
                                     // Mostrar el diálogo nuevamente para reflejar el cambio
                                     changeEmail();
                                 } else {
-                                    Toast.makeText(getActivity(), "Cambio de correo electrónico falló", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), R.string.errorOccurred, Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }
             } else {
-                Toast.makeText(getActivity(), "Los correos electrónicos no coinciden o tienen un formato inválido", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.errorEmailChange, Toast.LENGTH_SHORT).show();
             }
         });
 
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton(R.string.cancel, null);
 
         AlertDialog dialog = builder.create();
         dialog.show();

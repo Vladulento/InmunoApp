@@ -46,18 +46,18 @@ public class LoginActivity extends AppCompatActivity {
 
             final EditText resetMail = new EditText(v.getContext());
             final AlertDialog.Builder passwordResetDialog = new AlertDialog.Builder(v.getContext());
-            passwordResetDialog.setTitle("¿Desea cambiar su contraseña ?");
-            passwordResetDialog.setMessage("Introduzca su correo electrónico para recibir el enlace necesario.");
+            passwordResetDialog.setTitle(R.string.changePasswordQuestion);
+            passwordResetDialog.setMessage(R.string.writeEmailPassword);
             passwordResetDialog.setView(resetMail);
 
-            passwordResetDialog.setPositiveButton("Sí", (dialog, which) -> {
+            passwordResetDialog.setPositiveButton(R.string.yes, (dialog, which) -> {
                 // extract the email and send reset link
                 String mail = resetMail.getText().toString();
-                mAuth.sendPasswordResetEmail(mail).addOnSuccessListener(aVoid -> Toast.makeText(LoginActivity.this, "Enlace mandado a su correo electrónico.", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(LoginActivity.this, "¡Ha surgido algún error!" + e.getMessage(), Toast.LENGTH_SHORT).show());
+                mAuth.sendPasswordResetEmail(mail).addOnSuccessListener(aVoid -> Toast.makeText(LoginActivity.this, R.string.emailSent, Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(LoginActivity.this, R.string.errorOccurred + e.getMessage(), Toast.LENGTH_SHORT).show());
 
             });
 
-            passwordResetDialog.setNegativeButton("No", (dialog, which) -> {
+            passwordResetDialog.setNegativeButton(R.string.no, (dialog, which) -> {
                 // close the dialog
             });
 
@@ -75,11 +75,11 @@ public class LoginActivity extends AppCompatActivity {
         // validations for input email and password
 
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getApplicationContext(), "Introduzca el correo electrónico", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.writeEmail, Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (TextUtils.isEmpty(password)) {Toast.makeText(getApplicationContext(), "Introduzca la contraseña", Toast.LENGTH_LONG).show();
+        if (TextUtils.isEmpty(password)) {Toast.makeText(getApplicationContext(), R.string.writePassword, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
 
                             else {
-                                Toast.makeText(getApplicationContext(), "Los datos introducidos son incorrectos", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), R.string.incorrectData, Toast.LENGTH_LONG).show();
                             }
                         });
     }

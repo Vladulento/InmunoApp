@@ -8,7 +8,6 @@
     android:columnCount="3"
     android:orientation="horizontal">
 
-    <!-- Primera fila -->
     <TextView
         android:id="@+id/nameTextView"
         android:layout_width="0dp"
@@ -19,6 +18,26 @@
         android:layout_columnWeight="1"
         android:layout_marginStart="3dp"
         android:layout_marginBottom="5dp" />
+
+    <TextView
+        android:id="@+id/genderTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:layout_columnWeight="1"
+        android:layout_marginStart="3dp"
+        android:layout_marginBottom="5dp" />
+
+    <TextView
+        android:id="@+id/ageTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:layout_columnWeight="1"
+        android:layout_marginBottom="5dp"
+        android:layout_marginStart="3dp" />
 
     <TextView
         android:id="@+id/heightTextView"
@@ -39,29 +58,6 @@
         android:layout_columnWeight="1"
         android:layout_marginStart="3dp"
         android:layout_marginBottom="5dp" />
-
-    <TextView
-        android:id="@+id/ageTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        android:layout_columnWeight="1"
-        android:layout_marginBottom="5dp"
-        android:layout_marginStart="3dp" />
-
-    <TextView
-        android:id="@+id/genderTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        android:layout_columnWeight="1"
-        android:layout_marginStart="3dp"
-        android:layout_marginBottom="5dp" />
-
-    <!-- Segunda fila -->
-
 
     <Space
         android:layout_width="0dp"
