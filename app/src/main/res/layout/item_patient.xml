@@ -20,8 +20,17 @@
         android:layout_marginStart="3dp"
         android:layout_marginBottom="5dp" />
 
-    <!-- Columna vacía en la primera fila -->
+    <TextView
+        android:id="@+id/heightTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:layout_columnWeight="1"
+        android:layout_marginStart="60dp"
+        android:layout_marginBottom="5dp" />
 
+    <!-- Columna vacía en la primera fila -->
 
     <TextView
         android:id="@+id/genderTextView"
@@ -33,10 +42,7 @@
         android:layout_marginStart="60dp"
         android:layout_marginBottom="5dp" />
 
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_columnWeight="1" />
+
 
     <!-- Segunda fila -->
     <TextView
@@ -49,15 +55,6 @@
         android:layout_marginBottom="5dp"
         android:layout_marginStart="3dp" />
 
-    <TextView
-        android:id="@+id/heightTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        android:layout_columnWeight="1"
-        android:layout_marginStart="60dp"
-        android:layout_marginBottom="5dp" />
 
     <TextView
         android:id="@+id/weightTextView"
@@ -65,8 +62,13 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="@color/black"
-        android:layout_columnWeight="1"
+        android:layout_columnWeight="2"
         android:layout_marginStart="60dp"
         android:layout_marginBottom="5dp" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_columnWeight="1" />
 
 </GridLayout>

@@ -1,31 +1,36 @@
 package com.uc3m.InmunoApp.Account;
 
+import com.uc3m.InmunoApp.R;
+import com.uc3m.InmunoApp.Main.LoginActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import android.app.AlertDialog;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.text.InputType;
+
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Button;
-
-import android.content.SharedPreferences;
 import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseAuth;
-
-import com.google.firebase.auth.FirebaseUser;
-import com.uc3m.InmunoApp.R;
-import com.uc3m.InmunoApp.Main.LoginActivity;
 
 import java.util.Objects;
 
@@ -99,14 +104,73 @@ public class UserFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Cambio de contraseña");
 
-        LinearLayout linearLayout = new LinearLayout(getActivity());
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        // Crear el layout para el diálogo
+        LinearLayout mainLayout = new LinearLayout(getActivity());
+        mainLayout.setOrientation(LinearLayout.VERTICAL);
+        mainLayout.setPadding(50, 40, 50, 10); // Añadir padding para espacio extra
+
+        // Layout para el primer EditText y su CheckBox
+        LinearLayout newPasswordLayout = new LinearLayout(getActivity());
+        newPasswordLayout.setOrientation(LinearLayout.HORIZONTAL);
 
         final EditText newPasswordInput = new EditText(getActivity());
-        newPasswordInput.setHint("Introduzca su nueva contraseña");
-        linearLayout.addView(newPasswordInput);
+        newPasswordInput.setHint("Nueva contraseña");
+        newPasswordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-        builder.setView(linearLayout);
+        final CheckBox showNewPasswordCheckBox = new CheckBox(getActivity());
+        showNewPasswordCheckBox.setButtonDrawable(R.drawable.checkbox_password);
+
+        newPasswordLayout.addView(newPasswordInput, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        newPasswordLayout.addView(showNewPasswordCheckBox);
+
+        mainLayout.addView(newPasswordLayout);
+
+        // Añadir un espacio entre los EditTexts
+        Space space = new Space(getActivity());
+        LinearLayout.LayoutParams spaceParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 20);
+        space.setLayoutParams(spaceParams);
+        mainLayout.addView(space);
+
+        // Layout para el segundo EditText y su CheckBox
+        LinearLayout confirmPasswordLayout = new LinearLayout(getActivity());
+        confirmPasswordLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        final EditText confirmPasswordInput = new EditText(getActivity());
+        confirmPasswordInput.setHint("Confirmar");
+        confirmPasswordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        final CheckBox showConfirmPasswordCheckBox = new CheckBox(getActivity());
+        showConfirmPasswordCheckBox.setButtonDrawable(R.drawable.checkbox_password);
+
+        confirmPasswordLayout.addView(confirmPasswordInput, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        confirmPasswordLayout.addView(showConfirmPasswordCheckBox);
+
+        mainLayout.addView(confirmPasswordLayout);
+
+        // Listener para el CheckBox del nuevo password
+        showNewPasswordCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                newPasswordInput.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            } else {
+                newPasswordInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            }
+            // Mover el cursor al final
+            newPasswordInput.setSelection(newPasswordInput.getText().length());
+        });
+
+        // Listener para el CheckBox de confirmación de password
+        showConfirmPasswordCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                confirmPasswordInput.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            } else {
+                confirmPasswordInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            }
+            // Mover el cursor al final
+            confirmPasswordInput.setSelection(confirmPasswordInput.getText().length());
+        });
+
+        builder.setView(mainLayout);
 
         builder.setPositiveButton("Cambiar", (dialogInterface, i) -> {
             String newPassword = newPasswordInput.getText().toString().trim();
@@ -118,12 +182,12 @@ public class UserFragment extends Fragment {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(getActivity(), "Contraseña cambiada con éxito", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getActivity(), "¡Ha surgido algún error!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "Escoja otra contraseña y revise los campos", Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }
             } else {
-                Toast.makeText(getActivity(), "Rellene el campo de nueva contraseña ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Las contraseñas no coinciden o están vacias", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -132,6 +196,4 @@ public class UserFragment extends Fragment {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-
 }

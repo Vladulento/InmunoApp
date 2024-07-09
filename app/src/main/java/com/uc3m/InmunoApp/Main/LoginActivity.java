@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
 
                             else {
-                                Toast.makeText(getApplicationContext(), "¡Ha surgido algún error!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Los datos introducidos son incorrectos", Toast.LENGTH_LONG).show();
                             }
                         });
     }
