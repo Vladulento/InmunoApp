@@ -28,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        // Initialising all views through id defined above
+        // Inicializar vistas
         emailTextView = findViewById(R.id.logEmail);
         passwordTextView = findViewById(R.id.logPassword);
         CheckBox showPassword = findViewById(R.id.showLogPassword);
@@ -37,42 +37,45 @@ public class LoginActivity extends AppCompatActivity {
         Button btnPassword = findViewById(R.id.forgotPassword);
 
         // Listeners
-
         showPassword.setOnCheckedChangeListener((buttonView, isChecked) -> onCheckedChanged(isChecked));
         btn.setOnClickListener(v -> loginUserAccount());
         btnReg.setOnClickListener(v -> openRegisterActivity());
 
+
+        // Listener para manejar el evento de olvido de contraseña
         btnPassword.setOnClickListener(v -> {
 
+            // Crear el diálogo de alerta
             final EditText resetMail = new EditText(v.getContext());
             final AlertDialog.Builder passwordResetDialog = new AlertDialog.Builder(v.getContext());
             passwordResetDialog.setTitle(R.string.changePasswordQuestion);
             passwordResetDialog.setMessage(R.string.writeEmailPassword);
             passwordResetDialog.setView(resetMail);
 
+            // Manejo del evento
             passwordResetDialog.setPositiveButton(R.string.yes, (dialog, which) -> {
-                // extract the email and send reset link
+                // enviar enlace de reinicio de contraseña para el correo electrónico proporcionado
                 String mail = resetMail.getText().toString();
                 mAuth.sendPasswordResetEmail(mail).addOnSuccessListener(aVoid -> Toast.makeText(LoginActivity.this, R.string.emailSent, Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(LoginActivity.this, R.string.errorOccurred + e.getMessage(), Toast.LENGTH_SHORT).show());
 
             });
 
             passwordResetDialog.setNegativeButton(R.string.no, (dialog, which) -> {
-                // close the dialog
+                // cerrar el diálogo
             });
 
             passwordResetDialog.create().show();
-
         });
     }
 
+    // Método para iniciar sesión en la cuenta de usuario
     private void loginUserAccount() {
 
         String email, password;
         email = emailTextView.getText().toString();
         password = passwordTextView.getText().toString();
 
-        // validations for input email and password
+        // Comprobar que los campos no estén vacíos
 
         if (TextUtils.isEmpty(email)) {
             Toast.makeText(getApplicationContext(), R.string.writeEmail, Toast.LENGTH_LONG).show();
@@ -83,8 +86,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // sign in existing user
-
+        // Manejar el inicio de sesión con Firebase
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(
                         task -> {
@@ -93,20 +95,20 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                                 finish();
-                            }
-
-                            else {
+                            } else {
                                 Toast.makeText(getApplicationContext(), R.string.incorrectData, Toast.LENGTH_LONG).show();
                             }
                         });
     }
 
+    // Método para redirigir al usuario a la pantalla de registro
     private void openRegisterActivity() {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
         finish();
     }
 
+    // Método para mostrar u ocultar la contraseña
     private void onCheckedChanged(boolean isChecked) {
         if (isChecked) {
             passwordTextView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());

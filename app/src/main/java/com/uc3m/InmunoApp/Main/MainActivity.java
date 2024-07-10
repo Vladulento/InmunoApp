@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        // Check if the user is authenticated or not
+        // Comprobamos la autentificación del usuario
 
         if (mAuth.getCurrentUser() != null) {
             Intent intent = new Intent(this, HomeActivity.class);

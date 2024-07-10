@@ -37,7 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        // Initialize views
+        // Inicializar vistas
         nameTextView = findViewById(R.id.regName);
         emailTextView = findViewById(R.id.regEmail);
         numberTextView = findViewById(R.id.regNumber);
@@ -50,16 +50,16 @@ public class RegisterActivity extends AppCompatActivity {
         Button btnLogin = findViewById(R.id.goLoginButton);
 
         //Listeners
-
         showPassword.setOnCheckedChangeListener((buttonView, isChecked) -> onCheckedChanged(isChecked));
         showPassword2.setOnCheckedChangeListener((buttonView, isChecked) -> onCheckedChanged2(isChecked));
         btn.setOnClickListener(v -> registerNewUser());
         btnLogin.setOnClickListener(v -> openLoginActivity());
     }
+
+    // Método para registrar un nuevo usuario
     private void registerNewUser() {
 
-        // Check every field
-
+        // Pasar a variable cada campo
         String email, password, name, confirmPassword, number;
         email = emailTextView.getText().toString();
         number = numberTextView.getText().toString();
@@ -68,65 +68,70 @@ public class RegisterActivity extends AppCompatActivity {
         confirmPassword = confirmPasswordTextView.getText().toString();
         int selectedRadioButtonId = rolRadioGroup.getCheckedRadioButtonId();
 
+        // Comprobaciones para el correo electrónico
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getApplicationContext(), "Introduzca su correo electrónico", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.writeEmail, Toast.LENGTH_LONG).show();
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(getApplicationContext(), "Introduzca un correo electrónico válido", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.validEmail, Toast.LENGTH_LONG).show();
             return;
         }
 
+        // Comprobaciones para el número de teléfono
         if (TextUtils.isEmpty(number)) {
-            Toast.makeText(getApplicationContext(), "Introduzca su número de teléfono", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.writeNumber, Toast.LENGTH_LONG).show();
             return;
         }
         if (number.length() != 9) {
-            Toast.makeText(getApplicationContext(), "Introduzca un número de teléfono válido", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.validNumber, Toast.LENGTH_LONG).show();
             return;
         }
 
+        // Comprobaciones para la contraseña
         if (TextUtils.isEmpty(password)) {
-            Toast.makeText(getApplicationContext(), "Introduzca su contraseña, por favor", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.writePassword, Toast.LENGTH_LONG).show();
             return;
         }
         if (password.length() < 6) {
-            Toast.makeText(getApplicationContext(), "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.shortPassword, Toast.LENGTH_LONG).show();
             return;
         }
 
+        // Comprobar que el campo de nombre no esté vacío
         if (TextUtils.isEmpty(name)) {
-            Toast.makeText(getApplicationContext(), "Introduzca su nombre, por favor", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.writeName, Toast.LENGTH_LONG).show();
             return;
         }
 
+        // Comprobaciones para la confirmación de la contraseña
         if (TextUtils.isEmpty(confirmPassword)) {
-            Toast.makeText(getApplicationContext(), "Confirme su contraseña, por favor", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.confirmPassword, Toast.LENGTH_LONG).show();
             return;
         }
         if (!password.equals(confirmPassword)) {
-            Toast.makeText(getApplicationContext(), "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.validPassword, Toast.LENGTH_LONG).show();
             return;
         }
 
+        // Comprobar que se ha seleccionado un rol
         if (selectedRadioButtonId == -1) {
-            Toast.makeText(getApplicationContext(), "Por favor seleccione su rol", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.selectRol, Toast.LENGTH_LONG).show();
             return;
         }
 
-        // SharedPreferences para guardar el nombre y el rol
+        // Cambiar a BBDD en tiempo real
 
         RadioButton selectedRadioButton = findViewById(selectedRadioButtonId);
         String rol = selectedRadioButton.getText().toString();
 
         SharedPreferences sharedPreferences = getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
-        myEdit.putString("userName", "¡Hola, " + name + "!");
-        myEdit.putString("userRol", "Tu rol es " + rol + ".");
+        myEdit.putString("userName", R.string.hi + name + "!");
+
         myEdit.apply();
 
-        // Create user with email and password
-
+        // Manejar el registro del nuevo usuario con Firebase, mediante correo electrónico y contraseña
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -136,17 +141,20 @@ public class RegisterActivity extends AppCompatActivity {
                         finish();
                     }
                     else {
-                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Registro fallido, vuelva a intentarlo más tarde";
+                        String errorMessage = task.getException() != null ? task.getException().getMessage() : String.valueOf(R.string.registerFailed);
                         Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
+    // Redigir al usuario a la pantalla de inicio de sesión
     private void openLoginActivity() {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
     }
+
+    // Método para mostrar u ocultar la contraseña
     private void onCheckedChanged(boolean isChecked) {
         if (isChecked) {
             passwordTextView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
@@ -154,6 +162,8 @@ public class RegisterActivity extends AppCompatActivity {
             passwordTextView.setTransformationMethod(PasswordTransformationMethod.getInstance());
         }
     }
+
+    // Método para mostrar u ocultar la contraseña de confirmación
     private void onCheckedChanged2(boolean isChecked) {
         if (isChecked) {
             confirmPasswordTextView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());

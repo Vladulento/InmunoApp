@@ -52,6 +52,8 @@ public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserView
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            // Inicializar vistas
             nameTextView = itemView.findViewById(R.id.nameTextView);
             genderTextView = itemView.findViewById(R.id.genderTextView);
             ageTextView = itemView.findViewById(R.id.ageTextView);
@@ -62,9 +64,9 @@ public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserView
         public void bind(final Patient user, final OnItemClickListener listener) {
             nameTextView.setText(user.getName());
             genderTextView.setText(user.getGender());
-            ageTextView.setText("Edad: " + user.getAge());
-            heightTextView.setText("Altura: " + user.getHeight() + " m");
-            weightTextView.setText("Peso: " + user.getWeight() + " kg");
+            ageTextView.setText(R.string.bindAge + user.getAge());
+            heightTextView.setText(R.string.bindHeight + user.getHeight() + " m");
+            weightTextView.setText(R.string.bindWeight + user.getWeight() + " kg");
 
             itemView.setOnClickListener(v -> listener.onItemClick(user));
         }

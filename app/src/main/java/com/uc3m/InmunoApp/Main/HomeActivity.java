@@ -19,7 +19,7 @@ public class HomeActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
-            // Set up bottom navigation
+            // Establecer la barra de navegación
 
             BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
             bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -38,7 +38,7 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             });
 
-            // Set default selection
+            // Establecer el fragmento inicial por defecto
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new PatientsFragment()).commit();
                 bottomNavigationView.setSelectedItemId(R.id.nav_patients);

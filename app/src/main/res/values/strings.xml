@@ -12,43 +12,9 @@
     <string name="confirm">Confirmar</string>
     <string name="change">Cambiar</string>
     <string name="noInfo">Sin información</string>
-
-    // activity_login.xml
-
-    <string name="loginEmail">Introduzca su correo electrónico</string>
-    <string name="loginPassword">Introduzca su contraseña</string>
-    <string name="noAccount">¿No tienes cuenta todavía?</string>
-    <string name="resetPassword">¿Has olvidado tu contraseña?</string>
-
-    // LoginActivity
-
-    <string name="changePasswordQuestion">¿Desea cambiar su contraseña?</string>
-    <string name="writeEmailPassword">Introduzca su correo electrónico para recibir un enlace</string>
-    <string name="emailSent">Enlace mandado a su correo electrónico</string>
-    <string name="writeEmail">Introduzca el correo electrónico</string>
-    <string name="writePassword">Introduzca la contraseña</string>
-    <string name="incorrectData">Los datos introducidos son incorrectos</string>
-
-
-    //Register Activity
-
-    <string name="register">Registrarse</string>
-    <string name="registro">Registro</string>
-    <string name="form">Completa el siguiente formulario</string>
+    <string name="writeEmail">Rellene el campo de correo electrónico</string>
+    <string name="writePassword">Rellene del campo de contraseña</string>
     <string name="save">Guardar</string>
-    <string name="backLogin">Ya tengo una cuenta</string>
-    <string name="registerName">Nombre y apellidos</string>
-    <string name="registerEmail">Correo electrónico</string>
-    <string name="registerNumber">Número de teléfono</string>
-    <string name="registerPassword">Contraseña</string>
-    <string name="caractersPassword">La contraseña debe tener al menos 6 caracteres</string>
-    <string name="registerPassword2">Repetir contraseña</string>
-    <string name="patient">Paciente</string>
-    <string name="user">Usuario</string>
-    <string name="doctor">Médico</string>
-    <string name="rol">Seleccione su rol:</string>
-
-    // Seguir aquí con register
 
     // fragment_user.xml
 
@@ -76,11 +42,61 @@
     <string name="writeNewEmail">Introduzca su nuevo correo electrónico</string>
     <string name="confirmNewEmail">Confirma tu nuevo email</string>
     <string name="errorEmailChange">Los correos electrónicos no coinciden o tienen un formato inválido</string>
-
-
-
     <string name="current_email">Correo electrónico actual: %1$s</string>
     <string name="verification_email_sent">Correo de verificación enviado a %1$s</string>
+
+    // activity_login.xml
+
+    <string name="loginEmail">Introduzca su correo electrónico</string>
+    <string name="loginPassword">Introduzca su contraseña</string>
+    <string name="noAccount">¿No tienes cuenta todavía?</string>
+    <string name="resetPassword">¿Has olvidado tu contraseña?</string>
+
+    // LoginActivity
+
+    <string name="changePasswordQuestion">¿Desea cambiar su contraseña?</string>
+    <string name="writeEmailPassword">Introduzca su correo electrónico para recibir un enlace</string>
+    <string name="emailSent">Enlace mandado a su correo electrónico</string>
+    <string name="incorrectData">Los datos introducidos son incorrectos</string>
+
+    // activity_register.xml
+
+    <string name="registro">Registro</string>
+    <string name="form">Completa el siguiente formulario</string>
+    <string name="registerName">Nombre y apellidos</string>
+    <string name="registerEmail">Correo electrónico</string>
+    <string name="registerNumber">Número de teléfono</string>
+    <string name="registerPassword">Contraseña</string>
+    <string name="caractersPassword">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="registerPassword2">Repetir contraseña</string>
+    <string name="rol">Seleccione su rol:</string>
+    <string name="patient">Paciente</string>
+    <string name="doctor">Médico</string>
+    <string name="register">Registrarse</string>
+    <string name="backLogin">Ya tengo una cuenta</string>
+
+    // RegisterActivity
+
+    <string name="validEmail">Introduzca un correo electrónico válido</string>
+    <string name="writeNumber">Introduzca su número de teléfono</string>
+    <string name="validNumber">Introduzca un número de teléfono válido</string>
+    <string name="shortPassword">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="writeName">Introduzca sus apellidos</string>
+    <string name="confirmPassword">Confirme su contraseña</string>
+    <string name="validPassword">Las contraseñas no coinciden</string>
+    <string name="selectRol">Por favor seleccione su rol</string>
+    <string name="hi">¡Hola, </string>
+    <string name="registerFailed">Registro fallido, vuelva a intentarlo más tarde</string>
+
+    // patientAdapter
+
+    <string name="bindAge">Edad: %1$s</string>
+    <string name="bindHeight">Altura: %1$s</string>
+    <string name="bindWeight">Peso: %1$s</string>
+
+    // activity_patient_detail.xml
+
+    // patientDetailActivity
 
 
 </resources>

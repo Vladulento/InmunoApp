@@ -43,7 +43,7 @@ public class UserFragment extends Fragment {
 
         View  view = inflater.inflate(R.layout.fragment_user, container, false);
 
-        // Elementos de la vista
+        // Inicializar vistas
 
         TextView textViewUser = view.findViewById(R.id.text_user);
         Button logoutButton = view.findViewById(R.id.logoutButton);
@@ -58,45 +58,49 @@ public class UserFragment extends Fragment {
         passwordButton.setOnClickListener(v -> changePassword());
         emailButton.setOnClickListener(v -> changeEmail());
 
-        //Base de datos en tiempo real en vez de SharedPreferences
+        // Lectura de la base de datos en tiempo real en vez de SharedPreferences
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         String name = sharedPreferences.getString("userName", String.valueOf(R.string.noInfo));
         //String rol = sharedPreferences.getString("userRol", "nada");
+
+        // Mostrar el nombre del usuario
 
         textViewUser.setText(name);
 
         return view;
     }
 
+    // Método para cerrar la sesión del usuario y mandar a la pantalla de inicio de sesión
     private void logoutUser(){
         FirebaseAuth.getInstance().signOut();
-        // Redirigir al usuario a la pantalla de inicio de sesión o main activity
+
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         requireActivity().finish();
     }
 
+    // Método para borrar la cuenta del usuario
     private void deleteUser(){
-        // Crear una alerta de confirmación
+        // Alerta de confirmación
         new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.confirmDeleteAccount)
                 .setMessage(R.string.deleteAccountQuestion)
                 .setPositiveButton(R.string.yes, (dialog, which) -> {
-                    // Proceder con el borrado de la cuenta
+                    // Manejar el borrado de la cuenta del usuario
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     if (user != null) {
                         user.delete()
                                 .addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
-                                        // Redirigir al usuario a la pantalla de inicio de sesión o main activity
+                                        // Una vez borrado el usuario redirigir a la pantalla de inicio de sesión
                                         Intent intent = new Intent(getActivity(), LoginActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);
                                         requireActivity().finish();
                                     } else {
-                                        // Manejar el error
+                                        // Manejar el error al borrar la cuenta
                                         Toast.makeText(getActivity(), R.string.errorDeleteAccount + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 });
@@ -106,16 +110,18 @@ public class UserFragment extends Fragment {
                 .show();
     }
 
+    // Método para cambiar la contraseña del usuario
     private void changePassword(){
+        // Alerta de comprobación
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.titleChangePassword);
 
-        // Crear el layout para el diálogo
+        // Layout para el diálogo con padding
         LinearLayout mainLayout = new LinearLayout(getActivity());
         mainLayout.setOrientation(LinearLayout.VERTICAL);
-        mainLayout.setPadding(50, 40, 50, 10); // Añadir padding para espacio extra
+        mainLayout.setPadding(50, 40, 50, 10);
 
-        // Layout para el primer EditText y su CheckBox
+        // Primer EditText y su CheckBox
         LinearLayout newPasswordLayout = new LinearLayout(getActivity());
         newPasswordLayout.setOrientation(LinearLayout.HORIZONTAL);
 
@@ -131,14 +137,14 @@ public class UserFragment extends Fragment {
 
         mainLayout.addView(newPasswordLayout);
 
-        // Añadir un espacio entre los EditTexts
+        // Espacio entre EditText's
         Space space = new Space(getActivity());
         LinearLayout.LayoutParams spaceParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 20);
         space.setLayoutParams(spaceParams);
         mainLayout.addView(space);
 
-        // Layout para el segundo EditText y su CheckBox
+        // Segundo EditText y su CheckBox
         LinearLayout confirmPasswordLayout = new LinearLayout(getActivity());
         confirmPasswordLayout.setOrientation(LinearLayout.HORIZONTAL);
 
@@ -154,7 +160,7 @@ public class UserFragment extends Fragment {
 
         mainLayout.addView(confirmPasswordLayout);
 
-        // Listener para el CheckBox del nuevo password
+        // Listener para el CheckBox del nuevo password (primer EditText)
         showNewPasswordCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 newPasswordInput.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
@@ -165,7 +171,7 @@ public class UserFragment extends Fragment {
             newPasswordInput.setSelection(newPasswordInput.getText().length());
         });
 
-        // Listener para el CheckBox de confirmación de password
+        // Listener para el CheckBox de confirmación de password (segundo EditText)
         showConfirmPasswordCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 confirmPasswordInput.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
@@ -178,6 +184,7 @@ public class UserFragment extends Fragment {
 
         builder.setView(mainLayout);
 
+        // Manejo del cambio de contraseña
         builder.setPositiveButton(R.string.change, (dialogInterface, i) -> {
             String newPassword = newPasswordInput.getText().toString().trim();
             if (!newPassword.isEmpty()) {
@@ -203,6 +210,7 @@ public class UserFragment extends Fragment {
         dialog.show();
     }
 
+    // Método para cambiar el email del usuario
     private void changeEmail(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -210,27 +218,28 @@ public class UserFragment extends Fragment {
             return;
         }
 
+        // Alerta de comprobación
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.changeEmailTitle);
 
-        // Crear el layout para el diálogo
+        // Layout para el diálogo
         LinearLayout mainLayout = new LinearLayout(getActivity());
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         mainLayout.setPadding(50, 40, 50, 10); // Añadir padding para espacio extra
 
-        // Mostrar el email actual
+        // Mostrar el correo electrónico actual
         TextView currentEmailView = new TextView(getActivity());
         currentEmailView.setText(String.format(getString(R.string.current_email), user.getEmail()));
         mainLayout.addView(currentEmailView);
 
-        // Añadir un espacio entre el texto y el primer EditText
+        // Espacio entre el texto y el primer EditText
         Space space = new Space(getActivity());
         LinearLayout.LayoutParams spaceParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 20);
         space.setLayoutParams(spaceParams);
         mainLayout.addView(space);
 
-        // Crear el primer EditText para el nuevo email
+        // Primer EditText para el nuevo email
         final EditText newEmailInput = new EditText(getActivity());
         newEmailInput.setHint(R.string.writeNewEmail);
         newEmailInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
@@ -238,7 +247,7 @@ public class UserFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         mainLayout.addView(newEmailInput);
 
-        // Crear el segundo EditText para confirmar el nuevo email
+        // Segundo EditText para confirmar el nuevo email
         final EditText confirmEmailInput = new EditText(getActivity());
         confirmEmailInput.setHint(R.string.confirmNewEmail);
         confirmEmailInput.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
@@ -248,6 +257,7 @@ public class UserFragment extends Fragment {
 
         builder.setView(mainLayout);
 
+        // Manejo del cambio de email
         builder.setPositiveButton(R.string.change, (dialogInterface, i) -> {
             String newEmail = newEmailInput.getText().toString().trim();
             String confirmEmail = confirmEmailInput.getText().toString().trim();
@@ -259,8 +269,8 @@ public class UserFragment extends Fragment {
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(getActivity(), String.format(getString(R.string.verification_email_sent), newEmail), Toast.LENGTH_SHORT).show();
-                                    dialogInterface.dismiss();  // Cerrar el diálogo actual
-                                    // Mostrar el diálogo nuevamente para reflejar el cambio
+                                    dialogInterface.dismiss();
+                                    // Cierre del diálogo actual para mostrar el cambio de correo
                                     changeEmail();
                                 } else {
                                     Toast.makeText(getActivity(), R.string.errorOccurred, Toast.LENGTH_SHORT).show();

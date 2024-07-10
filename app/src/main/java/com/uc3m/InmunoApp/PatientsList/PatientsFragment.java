@@ -26,18 +26,18 @@ public class PatientsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_patients, container, false);
 
+        // Inicializar vistas
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewPatients);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         List<Patient> userList = new ArrayList<>();
 
-        // Add the users to the list
+        // Añadir los usuarios a la lista de pacientes
 
         userList.add(new Patient("Manuel", "Hombre", 25, 1.75, 70));
         userList.add(new Patient("Julia", "Mujer", 30, 1.60, 60));
 
-        // Handle the click on the users
-
+        // Manejar el click en la campo del paciente
         patientAdapter userAdapter = new patientAdapter(userList, user -> {
 
             Intent intent = new Intent(getActivity(), patientDetailActivity.class);
