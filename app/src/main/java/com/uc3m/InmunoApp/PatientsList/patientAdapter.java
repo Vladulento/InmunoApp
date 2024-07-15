@@ -1,5 +1,7 @@
 package com.uc3m.InmunoApp.PatientsList;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,46 +13,55 @@ import com.uc3m.InmunoApp.R;
 
 import java.util.List;
 
-public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserViewHolder> {
+public class patientAdapter extends RecyclerView.Adapter<patientAdapter.PatientViewHolder> {
 
-    public interface OnItemClickListener {
-        void onItemClick(Patient user);
-    }
+    private final List<Patient> patientList;
+    private final Context context;
 
-    private final List<Patient> userList;
-    private final OnItemClickListener listener;
-
-    public patientAdapter(List<Patient> userList, OnItemClickListener listener) {
-        this.userList = userList;
-        this.listener = listener;
+    public patientAdapter(Context context, List<Patient> patientList) {
+        this.context = context;
+        this.patientList = patientList;
     }
 
     @NonNull
     @Override
-    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public PatientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_patient, parent, false);
-        return new UserViewHolder(view);
+        return new PatientViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        Patient user = userList.get(position);
-        holder.bind(user, listener);
+    public void onBindViewHolder(@NonNull PatientViewHolder holder, int position) {
+        Patient patient = patientList.get(position);
+
+        // Establecer los valores de cada paciente en el Adapter
+        holder.nameTextView.setText(patient.getName());
+        holder.genderTextView.setText(patient.getGender());
+        holder.ageTextView.setText(context.getString(R.string.bindAge, patient.getAge()));
+        holder.heightTextView.setText(context.getString(R.string.bindHeight, patient.getHeight()));
+        holder.weightTextView.setText(context.getString(R.string.bindWeight, patient.getWeight()));
+
+        // Lanzar los valores a la siguiente actividad
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, patientDetailActivity.class);
+            intent.putExtra("name", patient.getName());
+            intent.putExtra("gender", patient.getGender());
+            intent.putExtra("age", patient.getAge());
+            intent.putExtra("height", patient.getHeight());
+            intent.putExtra("weight", patient.getWeight());
+            context.startActivity(intent);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return userList.size();
+        return patientList.size();
     }
 
-    public static class UserViewHolder extends RecyclerView.ViewHolder {
-        private final TextView nameTextView;
-        private final TextView genderTextView;
-        private final TextView ageTextView;
-        private final TextView heightTextView;
-        private final TextView weightTextView;
+    public static class PatientViewHolder extends RecyclerView.ViewHolder {
+        TextView nameTextView, genderTextView, ageTextView, heightTextView, weightTextView;
 
-        public UserViewHolder(@NonNull View itemView) {
+        public PatientViewHolder(@NonNull View itemView) {
             super(itemView);
 
             // Inicializar vistas
@@ -59,16 +70,6 @@ public class patientAdapter extends RecyclerView.Adapter<patientAdapter.UserView
             ageTextView = itemView.findViewById(R.id.ageTextView);
             heightTextView = itemView.findViewById(R.id.heightTextView);
             weightTextView = itemView.findViewById(R.id.weightTextView);
-        }
-
-        public void bind(final Patient user, final OnItemClickListener listener) {
-            nameTextView.setText(user.getName());
-            genderTextView.setText(user.getGender());
-            ageTextView.setText(R.string.bindAge + user.getAge());
-            heightTextView.setText(R.string.bindHeight + user.getHeight() + " m");
-            weightTextView.setText(R.string.bindWeight + user.getWeight() + " kg");
-
-            itemView.setOnClickListener(v -> listener.onItemClick(user));
         }
     }
 }

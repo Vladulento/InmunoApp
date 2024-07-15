@@ -8,9 +8,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import android.app.AlertDialog;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import android.os.Bundle;
 
@@ -60,13 +58,10 @@ public class UserFragment extends Fragment {
 
         // Lectura de la base de datos en tiempo real en vez de SharedPreferences
 
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
-        String name = sharedPreferences.getString("userName", String.valueOf(R.string.noInfo));
-        //String rol = sharedPreferences.getString("userRol", "nada");
 
         // Mostrar el nombre del usuario
 
-        textViewUser.setText(name);
+        textViewUser.setText("Nombre");
 
         return view;
     }

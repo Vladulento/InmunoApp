@@ -1,15 +1,13 @@
 package com.uc3m.InmunoApp.PatientsList;
 
-import java.io.Serializable;
-
-public class Patient implements Serializable {
+public class Patient {
     private final String name;
     private final String gender;
     private final int age;
-    private final double height;
-    private final double weight;
+    private final int height;
+    private final int weight;
 
-    public Patient(String name, String gender, int age, double height, double weight) {
+    public Patient(String name, String gender, int age, int height, int weight) {
         this.name = name;
         this.gender = gender;
         this.age = age;
@@ -26,10 +24,10 @@ public class Patient implements Serializable {
     public int getAge() {
         return age;
     }
-    public double getHeight() {
+    public int getHeight() {
         return height;
     }
-    public double getWeight() {
+    public int getWeight() {
         return weight;
     }
 }

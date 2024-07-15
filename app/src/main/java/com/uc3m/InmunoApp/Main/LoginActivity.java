@@ -5,21 +5,23 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.content.Intent;
-import android.widget.CheckBox;
 import android.widget.Toast;
 import android.widget.EditText;
 import android.text.TextUtils;
 import android.widget.Button;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.uc3m.InmunoApp.R;
+
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText emailTextView, passwordTextView;
     private FirebaseAuth mAuth;
+    private TextInputLayout passwordTextInputLayout;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +33,15 @@ public class LoginActivity extends AppCompatActivity {
         // Inicializar vistas
         emailTextView = findViewById(R.id.logEmail);
         passwordTextView = findViewById(R.id.logPassword);
-        CheckBox showPassword = findViewById(R.id.showLogPassword);
+        passwordTextInputLayout = findViewById(R.id.logPasswordLayout);
         Button btn = findViewById(R.id.loginButton);
         Button btnReg = findViewById(R.id.logToRegister);
         Button btnPassword = findViewById(R.id.forgotPassword);
 
+        passwordTextInputLayout.setEndIconDrawable(R.drawable.hide_password_layer);
+
         // Listeners
-        showPassword.setOnCheckedChangeListener((buttonView, isChecked) -> onCheckedChanged(isChecked));
+        passwordTextInputLayout.setEndIconOnClickListener(v -> togglePasswordVisibility());
         btn.setOnClickListener(v -> loginUserAccount());
         btnReg.setOnClickListener(v -> openRegisterActivity());
 
@@ -109,11 +113,15 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     // Método para mostrar u ocultar la contraseña
-    private void onCheckedChanged(boolean isChecked) {
-        if (isChecked) {
-            passwordTextView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            passwordTextView.setInputType(129); // Password hidden
+            passwordTextInputLayout.setEndIconDrawable(R.drawable.hide_password_layer);
         } else {
-            passwordTextView.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            passwordTextView.setInputType(144); // Password visible
+            passwordTextInputLayout.setEndIconDrawable(R.drawable.show_password_layer);
         }
+        isPasswordVisible = !isPasswordVisible;
+        passwordTextView.setSelection(Objects.requireNonNull(passwordTextView.getText()).length());
     }
 }

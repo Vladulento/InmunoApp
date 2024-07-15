@@ -20,9 +20,15 @@ public class MainActivity extends AppCompatActivity {
         // Comprobamos la autentificación del usuario
 
         if (mAuth.getCurrentUser() != null) {
+
+            // Rellenar aquí comprobación para paciente y llevar a la aplicación de María
+
+            // else{
             Intent intent = new Intent(this, HomeActivity.class);
             startActivity(intent);
             finish();
+            // }
+
         } else {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);

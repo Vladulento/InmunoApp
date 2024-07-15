@@ -8,4 +8,6 @@
     <color name="bkgNavigation">#031988</color>
     <color name="gray">#808080</color>
     <color name="lightGray">#D3D3D3</color>
+    <color name="darkGray">#A9A9A9</color>y
+    <color name="card">#80D3D3D3</color>
 </resources>

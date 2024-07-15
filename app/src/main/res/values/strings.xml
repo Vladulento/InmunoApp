@@ -70,10 +70,23 @@
     <string name="caractersPassword">La contraseña debe tener al menos 6 caracteres</string>
     <string name="registerPassword2">Repetir contraseña</string>
     <string name="rol">Seleccione su rol:</string>
+    <string name="gender">Seleccione su género:</string>
     <string name="patient">Paciente</string>
+    <string name="user">Usuario</string>
     <string name="doctor">Médico</string>
     <string name="register">Registrarse</string>
     <string name="backLogin">Ya tengo una cuenta</string>
+    <string name="height">Altura (cm)</string>
+    <string name="weight">Peso (kg)</string>
+    <string name="dateBirth">Fecha de nacimiento (dd/mm/aaaa)</string>
+
+
+    <string-array name='genderArray'>
+        <item>Hombre</item>
+        <item>Mujer</item>
+        <item>Prefiero no decirlo</item>
+    </string-array>
+
 
     // RegisterActivity
 
@@ -85,14 +98,26 @@
     <string name="confirmPassword">Confirme su contraseña</string>
     <string name="validPassword">Las contraseñas no coinciden</string>
     <string name="selectRol">Por favor seleccione su rol</string>
-    <string name="hi">¡Hola, </string>
     <string name="registerFailed">Registro fallido, vuelva a intentarlo más tarde</string>
+    <string name="writeWeight">Introduzca su peso en kilogramos</string>
+    <string name="writeHeight">Introduzca su altura en centímetros</string>
+    <string name="writeAge">Introduzca su fecha de nacimiento</string>
+    <string name="validAge">Introduzca una fecha de nacimiento con su formato</string>
+    <string name="writeGender">Por favor seleccione un género</string>
 
-    // patientAdapter
+    // patientApater y PatientsFragment
 
-    <string name="bindAge">Edad: %1$s</string>
-    <string name="bindHeight">Altura: %1$s</string>
-    <string name="bindWeight">Peso: %1$s</string>
+    <string name="sortList">Lista ordenada por: </string>
+    <string name="bindAge">Edad: %1$d</string>
+    <string name="bindHeight">Altura: %1$d cm</string>
+    <string name="bindWeight">Peso: %1$d kg</string>
+
+    <string-array name="orderPatients">
+        <item>Nombre (A-Z)</item>
+        <item>Nombre (Z-A)</item>
+        <item>Edad (Cre)</item>
+        <item>Edad (Decre)</item>
+    </string-array>
 
     // activity_patient_detail.xml
 
