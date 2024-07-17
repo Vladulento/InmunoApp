@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.Button;
@@ -95,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerNewUser() {
 
         // Pasar a variable cada campo
-        String email, password, name, confirmPassword, number, height, weight, dateBirth, gender;
+        String email, password, name, confirmPassword, number, height, weight, dateBirth;
         email = Objects.requireNonNull(emailTextView.getText()).toString().trim();
         number = Objects.requireNonNull(numberTextView.getText()).toString().trim();
         password = Objects.requireNonNull(passwordTextView.getText()).toString().trim();
@@ -104,7 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
         height = Objects.requireNonNull(heightTextView.getText()).toString().trim();
         weight = Objects.requireNonNull(weightTextView.getText()).toString().trim();
         dateBirth = Objects.requireNonNull(ageTextView.getText()).toString().trim();
-        gender = genderSpinner.getSelectedItem().toString().trim();
+        //gender = genderSpinner.getSelectedItem().toString().trim();
 
         int selectedRadioButtonId = rolRadioGroup.getCheckedRadioButtonId();
         String dateBirthFormat = "\\d{2}/\\d{2}/\\d{4}";
@@ -187,13 +186,6 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
         }
-
-        // Cambiar a BBDD en tiempo real
-
-        RadioButton selectedRadioButton = findViewById(selectedRadioButtonId);
-        String rol = selectedRadioButton.getText().toString();
-
-        Toast.makeText(getApplicationContext(), name, Toast.LENGTH_LONG).show();
 
         // Manejar el registro del nuevo usuario con Firebase, mediante correo electrónico y contraseña
         mAuth.createUserWithEmailAndPassword(email, password)

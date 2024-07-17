@@ -61,7 +61,7 @@ public class UserFragment extends Fragment {
 
         // Mostrar el nombre del usuario
 
-        textViewUser.setText("Nombre");
+        textViewUser.setText("Ignacio Moreno");
 
         return view;
     }

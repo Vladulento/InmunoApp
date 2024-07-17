@@ -6,13 +6,15 @@ public class Patient {
     private final int age;
     private final int height;
     private final int weight;
+    private final Doctor doctor;
 
-    public Patient(String name, String gender, int age, int height, int weight) {
+    public Patient(String name, String gender, int age, int height, int weight, Doctor doctor) {
         this.name = name;
         this.gender = gender;
         this.age = age;
         this.height = height;
         this.weight = weight;
+        this.doctor = doctor;
     }
 
     public String getName() {
@@ -30,4 +32,8 @@ public class Patient {
     public int getWeight() {
         return weight;
     }
+    public Doctor getDoctor() {
+        return doctor;
+    }
 }
+
