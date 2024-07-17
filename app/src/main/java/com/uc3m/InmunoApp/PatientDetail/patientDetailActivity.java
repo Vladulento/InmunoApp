@@ -1,4 +1,4 @@
-package com.uc3m.InmunoApp.PatientsList;
+package com.uc3m.InmunoApp.PatientDetail;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,5 +12,7 @@ public class patientDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_detail);
+
     }
+
 }

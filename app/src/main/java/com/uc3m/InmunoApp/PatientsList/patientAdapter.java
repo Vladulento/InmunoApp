@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.uc3m.InmunoApp.PatientDetail.patientDetailActivity;
 import com.uc3m.InmunoApp.R;
 
 import java.util.List;
