@@ -121,7 +121,53 @@
 
     // activity_patient_detail.xml
 
+    <string name="back_button">Back</string>
+    <string name="launch_button">Launch</string>
+    <string name="imageButtonToggle">Toggle</string>
+
+    <string name="genderD">GÉNERO</string>
+    <string name="ageD">EDAD</string>
+    <string name="heightD">ALTURA</string>
+    <string name="weightD">PESO</string>
+    <string name="treatment">Tratamiento</string>
+    <string name="graphics">Gráficas de las medidas</string>
+    <string name="selectImmunotherapy">Inmunoterapia</string>
+
+    <string-array name="immunotherapyTypes">
+        <item>Vacunas</item>
+        <item>Interferón</item>
+        <item>Interlucina 2</item>
+        <item>TILs</item>
+        <item>CAR</item>
+        <item>TCR</item>
+        <item>CTLA 4</item>
+        <item>PD 1</item>
+        <item>PD-L1</item>
+        <item>Combinación inhibidores</item>
+    </string-array>
+
+    <string name="currentFollowing">Actualmente siguiendo: %s</string>
+    <string name="hasFollowed">En el pasado siguió:</string>
+    <string name="typeImmunotherapy">Escoja un tipo para cambiarla:</string>
+    <string name="changeImmunotherapy">Cambiar tratamiento</string>
+    <string name="threshold">Valores umbral</string>
+    <string name="temperature">Temperatura máxima (ºC): </string>
+    <string name="cardFrequency">Frecuencia cardíaca (pulsos/min):</string>
+    <string name="máx">Máxima</string>
+    <string name="min">Mínima</string>
+    <string name="respFrequency">Frecuencia respiratoria (resp/min):</string>
+    <string name="thresholdSuccessful">¡Valores cambiados con éxito!</string>
+    <string name="changeThreshold">Guardar umbrales seleccionados</string>
+    <string name="symptoms">Síntomas</string>
+    <string name="addSymptoms">Escriba un nuevo síntoma</string>
+    <string name="add">Añadir</string>
+    <string name="listedSymptoms">Los eventos adversos son: </string>
+    <string name="emptySymptom">Escriba un síntoma antes de añadirlo</string>
+    
     // patientDetailActivity
+    
+    <string name="setHeightView">%1$d cm</string>
+    <string name="setWeightView">%1$d kg</string>
 
 
 </resources>

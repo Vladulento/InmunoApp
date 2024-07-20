@@ -15,6 +15,9 @@
         android:theme="@style/Theme.InmunoApp"
         tools:targetApi="31">
         <activity
+            android:name=".PatientDetail.ChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".PatientDetail.patientDetailActivity"
             android:exported="false" />
         <activity

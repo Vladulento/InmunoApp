@@ -31,7 +31,6 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputLayout passwordTextInputLayout, confirmPasswordTextInputLayout;
     private RadioGroup rolRadioGroup;
     private LinearLayout patientFields;
-    private Spinner genderSpinner;
     private FirebaseAuth mAuth;
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
@@ -54,7 +53,7 @@ public class RegisterActivity extends AppCompatActivity {
         heightTextView = findViewById(R.id.regHeight);
         weightTextView = findViewById(R.id.regWeight);
         ageTextView = findViewById(R.id.regDateBirth);
-        genderSpinner = findViewById(R.id.genderSpinner);
+        Spinner genderSpinner = findViewById(R.id.genderSpinner);
         heightTextView = findViewById(R.id.regHeight);
         weightTextView = findViewById(R.id.regWeight);
         ageTextView = findViewById(R.id.regDateBirth);
