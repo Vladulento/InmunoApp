@@ -159,15 +159,21 @@
     <string name="thresholdSuccessful">¡Valores cambiados con éxito!</string>
     <string name="changeThreshold">Guardar umbrales seleccionados</string>
     <string name="symptoms">Síntomas</string>
-    <string name="addSymptoms">Escriba un nuevo síntoma</string>
+    <string name="addSymptoms">Escriba el nuevo síntoma a añadir</string>
     <string name="add">Añadir</string>
     <string name="listedSymptoms">Los eventos adversos son: </string>
-    <string name="emptySymptom">Escriba un síntoma antes de añadirlo</string>
+    <string name="deleteSymptoms">Escriba el síntoma a eliminar</string>
+    <string name="delete">Borrar</string>
     
     // patientDetailActivity
     
     <string name="setHeightView">%1$d cm</string>
     <string name="setWeightView">%1$d kg</string>
+    <string name="enterSymptom">Introduzca un valor antes para borrarlo</string>
+    <string name="deletedSymptom">Síntoma borrado con éxito</string>
+    <string name="notDeletedSymptom">¡No se ha podido borrar el síntoma!</string>
+    <string name="notFoundSymptom">No se ha encontrado el síntoma introducido</string>
+    <string name="emptySymptom">Escriba un síntoma antes de añadirlo</string>
 
 
 </resources>

@@ -283,8 +283,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:textSize="16sp"
-                            android:textColor="@color/black"/>
+                            android:textSize="17sp"
+                            android:textColor="@color/black" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -553,11 +553,25 @@
                         android:layout_marginStart="20dp"
                         android:visibility="gone">
 
+                        <TextView
+                            android:id="@+id/symptomsList"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:textSize="17sp"
+                            android:textColor="@color/black"/>
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:layout_marginTop="10dp">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/baseline_add_circle_outline_24"
+                                android:layout_gravity="center"/>
 
                             <EditText
                                 android:id="@+id/symptomsEditText"
@@ -565,28 +579,50 @@
                                 android:layout_height="wrap_content"
                                 android:hint="@string/addSymptoms"
                                 android:textColor="@color/black"
-                                android:inputType="text" />
-
-                            <Button
-                                android:id="@+id/symptomsButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:backgroundTint="@color/transparent"
-                                android:textColor="@color/black"
-                                android:textStyle="bold"
-                                android:layout_marginStart="10dp"
-                                android:text="@string/add" />
+                                android:inputType="text"
+                                android:layout_marginStart="6dp"/>
                         </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/symptomsList"
+                        <Button
+                            android:id="@+id/symptomsButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:textSize="16sp"
-                            android:textColor="@color/black"/>
-                    </LinearLayout>
+                            android:backgroundTint="@color/transparent"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:text="@string/add"
+                            android:layout_marginStart="10dp"/>
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="10dp">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/baseline_delete_outline_24"
+                                android:layout_gravity="center"/>
+
+                            <EditText
+                                android:id="@+id/deleteSymptomsEditText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:hint="@string/deleteSymptoms"
+                                android:textColor="@color/black"
+                                android:layout_marginStart="6dp"
+                                android:inputType="text" />
+                        </LinearLayout>
+                        <Button
+                            android:id="@+id/deleteSymptomsButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/transparent"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:text="@string/delete" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

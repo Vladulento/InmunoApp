@@ -9,6 +9,7 @@ import android.content.Intent;
 
 import android.os.Bundle;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -43,66 +44,84 @@ public class patientDetailActivity extends AppCompatActivity {
     EditText respRateMin;
     EditText symptomsEditText;
     TextView symptomsTextView;
+    EditText deleteSymptomEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_detail);
 
-        // Inicializar toolbar
+        // Inicializar vistas
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
-
-        // Listener para el botón de atrás y el botón de chat
         ImageView backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> {
-            // Handle back button click
-            onBackPressed();
-        });
-
         ImageView launchButton = findViewById(R.id.chat_button);
-        launchButton.setOnClickListener(v -> {
-            // Handle launch button click
-            Intent intent1 = new Intent(patientDetailActivity.this, ChatActivity.class);
-            startActivity(intent1);
-        });
 
-        // Recibir los datos del paciente del Intent anterior
-        Intent intent = getIntent();
-        String name = intent.getStringExtra("name");
-        String gender = intent.getStringExtra("gender");
-        int age = intent.getIntExtra("age", 0);
-        int weight = intent.getIntExtra("weight", 0);
-        int height = intent.getIntExtra("height", 0);
-
-        // Configurar el CardView de información general con los datos recibidos
         TextView nameTextView = findViewById(R.id.detailName);
         TextView genderTextView = findViewById(R.id.detailGender);
         TextView ageTextView = findViewById(R.id.detailAge);
         TextView weightTextView = findViewById(R.id.detailWeight);
         TextView heightTextView = findViewById(R.id.detailHeight);
 
+        immunotherapyTextView = findViewById(R.id.immunotherapyFollowing);
+        pastImmunotherapyTextView = findViewById(R.id.immunotherapyFollowed);
+        Spinner immunoTherapySpinner = findViewById(R.id.immunotherapySpinner);
+        Button addTreatmentButton = findViewById(R.id.immunotherapyButton);
+
+        temperatureEditText = findViewById(R.id.temperatureEditText);
+        respRateMin = findViewById(R.id.respFreqMin);
+        respRateMax = findViewById(R.id.respFreqMax);
+        heartRateMin = findViewById(R.id.cardFreqMin);
+        heartRateMax = findViewById(R.id.cardFreqMax);
+        Button confirmThresholdtButton = findViewById(R.id.thresholdButton);
+
+        Button addSymptomButton = findViewById(R.id.symptomsButton);
+        Button deleteSymptomButton = findViewById(R.id.deleteSymptomsButton);
+        symptomsEditText = findViewById(R.id.symptomsEditText);
+        symptomsTextView = findViewById(R.id.symptomsList);
+        deleteSymptomEditText = findViewById(R.id.deleteSymptomsEditText);
+
+        // Establecer recursos
+
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+
+        Intent intent = getIntent();                                    // Recibir los datos del paciente del Intent anterior
+        String name = intent.getStringExtra("name");
+        String gender = intent.getStringExtra("gender");
+        int age = intent.getIntExtra("age", 0);
+        int weight = intent.getIntExtra("weight", 0);
+        int height = intent.getIntExtra("height", 0);
+                                                                        // Mostrar en el cardView de información general
         nameTextView.setText(name);
         genderTextView.setText(gender);
         ageTextView.setText(String.valueOf(age));
         weightTextView.setText(getString(R.string.setWeightView, weight));
         heightTextView.setText(getString(R.string.setHeightView, height));
 
-        // Leer los valores de los tratamientos
-        immunotherapyTextView = findViewById(R.id.immunotherapyFollowing);
-        pastImmunotherapyTextView = findViewById(R.id.immunotherapyFollowed);
-
-        getTreatmentsP1();
-
-        // Configurar el Spinner de tratamientos
-        Spinner immunoTherapySpinner = findViewById(R.id.immunotherapySpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,  // Spinner de tratamientos
                 R.array.immunotherapyTypes, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         immunoTherapySpinner.setAdapter(adapter);
 
-        // Listener para encontrar el valor del spinner anterior
+        setupCardView(R.id.registerCard, R.id.expandRegister);                              // CardViews
+        setupCardView(R.id.treatmentCard, R.id.expandTreatment);
+        setupCardView(R.id.graphicsCard, R.id.expandGraphics);
+
+        setupLinearLayout(R.id.immunotherapyLayout, R.id.expandImmunotherapy);              // LinearLayouts
+        setupLinearLayout(R.id.thresholdLayout, R.id.expandThreshold);
+        setupLinearLayout(R.id.symptomsLayout, R.id.expandSymptoms);
+
+        // Listeners
+
+        backButton.setOnClickListener(v -> onBackPressed());        // Botón de atrás
+
+        // Botón de chat
+        launchButton.setOnClickListener(v -> {
+            Intent intent1 = new Intent(patientDetailActivity.this, ChatActivity.class);
+            startActivity(intent1);
+        });
+
+        // Encontrar el valor del spinner anterior
         immunoTherapySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -115,43 +134,32 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         });
 
-        // Listener para el botón de añadir tratamiento
-        Button addTreatmentButton = findViewById(R.id.immunotherapyButton);
-        addTreatmentButton.setOnClickListener(v -> addTreatmentsP1(newTreatment));
+        addTreatmentButton.setOnClickListener(v -> addTreatmentsP1(newTreatment));    // Añadir tratamiento
 
-        // Leer los valores umbrales
-        temperatureEditText = findViewById(R.id.temperatureEditText);
-        getMaxTemperatureP1();
+        confirmThresholdtButton.setOnClickListener(v -> confirmThresholdsP1());      // Confirmar valores umbral
 
-        respRateMin = findViewById(R.id.respFreqMin);
-        respRateMax = findViewById(R.id.respFreqMax);
-        getRespRateMP1();
+        addSymptomButton.setOnClickListener(v -> addSymptomsP1());                    // Añadir síntoma
 
-        heartRateMin = findViewById(R.id.cardFreqMin);
-        heartRateMax = findViewById(R.id.cardFreqMax);
-        getHeartRateMP1();
+        deleteSymptomButton.setOnClickListener(v -> {                               // Borrar síntoma leído en el editText
+            String searchText = deleteSymptomEditText.getText().toString().trim();
+            if (!TextUtils.isEmpty(searchText)) {
+                searchAndDelete(searchText);
+            } else {
+                Toast.makeText(getApplicationContext(), R.string.enterSymptom, Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        // Confirmar los valores de los umbrales y actualizarlos
-        Button confirmThresholdtButton = findViewById(R.id.thresholdButton);
-        confirmThresholdtButton.setOnClickListener(v -> confirmThresholdsP1());
+        // Llamada a funciones
 
-        // Añadir y leer los síntomas del paciente 1
-        Button addSymptomButton = findViewById(R.id.symptomsButton);
-        symptomsEditText = findViewById(R.id.symptomsEditText);
-        symptomsTextView = findViewById(R.id.symptomsList);
+        getTreatmentsP1();      // Leer los valores de los tratamientos del paciente 1
 
-        addSymptomButton.setOnClickListener(v -> addSymptomsP1());
-        getSymptomsP1();
-        // Gestional los cardViews
-        setupCardView(R.id.registerCard, R.id.expandRegister);
-        setupCardView(R.id.treatmentCard, R.id.expandTreatment);
-        setupCardView(R.id.graphicsCard, R.id.expandGraphics);
+        getMaxTemperatureP1();  // Leer los valores de la temperatura del paciente 1
 
-        // Gestionar los LinearLayout
-        setupLinearLayout(R.id.immunotherapyLayout, R.id.expandImmunotherapy);
-        setupLinearLayout(R.id.thresholdLayout, R.id.expandThreshold);
-        setupLinearLayout(R.id.symptomsLayout, R.id.expandSymptoms);
+        getRespRateMP1();       // Leer los valores de las frecuencias respiratorias del paciente 1
 
+        getHeartRateMP1();      // Leer los valores de las frecuencias cardíacas del paciente 1
+
+        getSymptomsP1();        // Leer los síntomas del paciente 1
     }
 
     // Función para gestionar la dinámica de los CardViews
@@ -189,7 +197,6 @@ public class patientDetailActivity extends AppCompatActivity {
     // Función para leer los tratamientos del paciente 1
     private void getTreatmentsP1() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data").child("Treatment");
-        // Leemos los hijos de la rama "Treatment"
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -230,12 +237,9 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Función para añadir tratamientos al paciente 1
     private void addTreatmentsP1(String treatment) {
-        // Definir la ruta a la ubicación donde quieres añadir el nuevo hijo
         DatabaseReference newChildRef = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data").child("Treatment");
-
-        // Crear un nuevo hijo con un valor
-        // Utilizando push() para generar una clave única automáticamente
         DatabaseReference newChild = newChildRef.push();
 
         // Añadir el valor al nuevo hijo
@@ -270,6 +274,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Leemos la frecuencia respiratoria máxima y mínima del paciente 1
     private void getRespRateMP1() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Vital sign margins").child("Respiration rate");
         reference.addValueEventListener(new ValueEventListener() {
@@ -289,12 +294,12 @@ public class patientDetailActivity extends AppCompatActivity {
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Manejar los errores de lectura de la base de datos
                 Log.e("DatabaseError", databaseError.getMessage());
             }
         });
     }
 
+    // Leemos la frecuencia cardiaca máxima y mínima del paciente 1
     private void getHeartRateMP1() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Vital sign margins").child("Heart rate");
         reference.addValueEventListener(new ValueEventListener() {
@@ -314,12 +319,12 @@ public class patientDetailActivity extends AppCompatActivity {
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Manejar los errores de lectura de la base de datos
                 Log.e("DatabaseError", databaseError.getMessage());
             }
         });
     }
 
+    // Confirmas los valores umbrales de los editText en la BBDD del paciente 1
     private void confirmThresholdsP1() {
         // Leer los valores de los EditText
         Double temperature = ParseDouble(temperatureEditText.getText().toString());
@@ -328,7 +333,6 @@ public class patientDetailActivity extends AppCompatActivity {
         Integer minHeartRate = Integer.parseInt(heartRateMin.getText().toString());
         Integer maxHeartRate = Integer.parseInt(heartRateMax.getText().toString());
 
-        // Definir la ruta a la ubicación donde quieres añadir el nuevo hijo
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Vital sign margins");
 
         // Temperatura
@@ -380,6 +384,8 @@ public class patientDetailActivity extends AppCompatActivity {
         });
         Toast.makeText(getApplicationContext(), R.string.thresholdSuccessful, Toast.LENGTH_LONG).show();
     }
+
+    // Función para parsear el double de temperatura
     double ParseDouble(String strNumber) {
         if (strNumber != null && strNumber.length() > 0) {
             try {
@@ -391,6 +397,7 @@ public class patientDetailActivity extends AppCompatActivity {
         else return 0;
     }
 
+    // Añadir síntomas al paciente 1
     private void addSymptomsP1() {
         String symptom = symptomsEditText.getText().toString();
 
@@ -415,6 +422,7 @@ public class patientDetailActivity extends AppCompatActivity {
         }
     }
 
+    // Leer los síntomas del paciente 1
     private void getSymptomsP1() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data").child("Adverse events");
         // Leemos los hijos de la rama "Treatment"
@@ -437,6 +445,40 @@ public class patientDetailActivity extends AppCompatActivity {
                     }
                 }
                 symptomsTextView.setText(symptomsList);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Manejar los errores de lectura de la base de datos
+                Log.e("DatabaseError", databaseError.getMessage());
+            }
+        });
+    }
+
+    // Buscar y borrar un síntoma dado en la BBDD del paciente 1
+    private void searchAndDelete(String searchText) {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data").child("Adverse events");
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                boolean found = false;
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    String value = childSnapshot.getValue(String.class);
+
+                    if (searchText.equalsIgnoreCase(value != null ? value.trim() : "")) {
+                        found = true;
+                        childSnapshot.getRef().removeValue().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(getApplicationContext(), R.string.deletedSymptom, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), R.string.notDeletedSymptom, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        break;
+                    }
+                }
+                if (!found) {
+                    Toast.makeText(getApplicationContext(), R.string.notFoundSymptom, Toast.LENGTH_SHORT).show();
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
