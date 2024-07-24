@@ -487,5 +487,4 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         });
     }
-
 }
