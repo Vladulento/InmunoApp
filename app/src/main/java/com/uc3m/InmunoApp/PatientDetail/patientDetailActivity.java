@@ -4,9 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.NotificationCompat;
 
+import android.app.DatePickerDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import android.text.TextUtils;
@@ -15,6 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,6 +30,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,8 +41,21 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.uc3m.InmunoApp.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Calendar;
+import java.util.List;
+
+import com.github.mikephil.charting.components.LimitLine;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 
 public class patientDetailActivity extends AppCompatActivity {
     TextView immunotherapyTextView;
@@ -43,8 +67,13 @@ public class patientDetailActivity extends AppCompatActivity {
     EditText respRateMax;
     EditText respRateMin;
     EditText symptomsEditText;
-    TextView symptomsTextView;
+    TextView adverseEventsTextView;
     EditText deleteSymptomEditText;
+    private LineChart chart;
+    private TextView symptomsTextView;
+    private String startDate;
+    private String endDate;
+    private int selectedMeasure;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +106,14 @@ public class patientDetailActivity extends AppCompatActivity {
         Button addSymptomButton = findViewById(R.id.symptomsButton);
         Button deleteSymptomButton = findViewById(R.id.deleteSymptomsButton);
         symptomsEditText = findViewById(R.id.symptomsEditText);
-        symptomsTextView = findViewById(R.id.symptomsList);
+        adverseEventsTextView = findViewById(R.id.symptomsList);
         deleteSymptomEditText = findViewById(R.id.deleteSymptomsEditText);
+
+        chart = findViewById(R.id.chart);
+        Spinner spinner = findViewById(R.id.spinner);
+        Button buttonStartDate = findViewById(R.id.start_date);
+        Button buttonEndDate = findViewById(R.id.end_date);
+        symptomsTextView = findViewById(R.id.symptomsTextView);
 
         // Establecer recursos
 
@@ -110,6 +145,11 @@ public class patientDetailActivity extends AppCompatActivity {
         setupLinearLayout(R.id.immunotherapyLayout, R.id.expandImmunotherapy);              // LinearLayouts
         setupLinearLayout(R.id.thresholdLayout, R.id.expandThreshold);
         setupLinearLayout(R.id.symptomsLayout, R.id.expandSymptoms);
+
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this,
+                R.array.measuresTypes, android.R.layout.simple_spinner_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter2);
 
         // Listeners
 
@@ -149,6 +189,54 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         });
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedMeasure = position;        }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        buttonStartDate.setOnClickListener(v -> showDatePickerDialog((date) -> {
+            startDate = date;
+
+            if (startDate != null) {
+                buttonStartDate.setText(startDate);
+                if(endDate != null){
+
+                    if(selectedMeasure == 0) {
+                        plotBloodPressure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Blood pressure"),startDate, endDate, getString(R.string.bloodPessure));
+                    }else if(selectedMeasure == 1) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Breath rate"), startDate, endDate, getString(R.string.respFreq));
+                    }else if(selectedMeasure == 2) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Heart rate"), startDate, endDate, getString(R.string.cardFreq));
+                    }else if(selectedMeasure == 3) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Oxygen saturation"), startDate, endDate, getString(R.string.satOxygen));
+                    }
+                }
+            }
+        }));
+
+        buttonEndDate.setOnClickListener(v -> showDatePickerDialog((date) -> {
+            endDate = date;
+
+            if (endDate != null) {
+                buttonEndDate.setText(endDate);
+                if(startDate != null){
+
+                    if(selectedMeasure == 0) {
+                        plotBloodPressure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Blood pressure"),startDate, endDate, getString(R.string.bloodPessure));
+                    }else if(selectedMeasure == 1) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Breath rate"), startDate, endDate, getString(R.string.respFreq));
+                    }else if(selectedMeasure == 2) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Heart rate"), startDate, endDate, getString(R.string.cardFreq));
+                    }else if(selectedMeasure == 3) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Oxygen saturation"), startDate, endDate, getString(R.string.satOxygen));
+                    }
+                }
+            }
+        }));
+
         // Llamada a funciones
 
         getTreatmentsP1();      // Leer los valores de los tratamientos del paciente 1
@@ -160,6 +248,10 @@ public class patientDetailActivity extends AppCompatActivity {
         getHeartRateMP1();      // Leer los valores de las frecuencias cardíacas del paciente 1
 
         getSymptomsP1();        // Leer los síntomas del paciente 1
+
+        notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1")); // Listener de notificaciones
+
+         // Actualizar el gráfico
     }
 
     // Función para gestionar la dinámica de los CardViews
@@ -444,7 +536,7 @@ public class patientDetailActivity extends AppCompatActivity {
                         symptomsList = symptomsList.concat(symptoms.get(i)).concat(",").concat(" ");
                     }
                 }
-                symptomsTextView.setText(symptomsList);
+                adverseEventsTextView.setText(symptomsList);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -484,6 +576,208 @@ public class patientDetailActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Manejar los errores de lectura de la base de datos
                 Log.e("DatabaseError", databaseError.getMessage());
+            }
+        });
+    }
+
+    private void notificationListener(DatabaseReference patientRef) {
+        DatabaseReference measuresRef = patientRef.child("Measures");
+        DatabaseReference marginsRef = patientRef.child("Medical information").child("Vital sign margins");
+
+        marginsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Integer heartRateMin = dataSnapshot.child("Heart rate").child("Min").getValue(Integer.class);
+                Integer heartRateMax = dataSnapshot.child("Heart rate").child("Max").getValue(Integer.class);
+                Integer respRateMin = dataSnapshot.child("Respiration rate").child("Min").getValue(Integer.class);
+                Integer respRateMax = dataSnapshot.child("Respiration rate").child("Max").getValue(Integer.class);
+
+                // Ahora configura el listener para las medidas de Heart rate y Respiration rate
+                if (heartRateMin != null && heartRateMax != null && respRateMin != null && respRateMax != null) {
+                    // Configurar el listener para las medidas de Heart rate y Respiration rate
+                    addMeasureListener(measuresRef.child("Heart rate"), heartRateMin, heartRateMax, "Heart rate");
+                    addMeasureListener(measuresRef.child("Breath rate"), respRateMin, respRateMax, "Respiration rate");
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Manejar los errores de lectura de la base de datos
+                Log.e("DatabaseError", databaseError.getMessage());
+            }
+        });
+    }
+
+    private void addMeasureListener(DatabaseReference measureRef, double min, double max, String measureType) {
+        measureRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot measureSnapshot : dataSnapshot.getChildren()) {
+                    Integer value = measureSnapshot.child("Value").getValue(Integer.class);
+                    String timestamp = measureSnapshot.child("Timestamp").getValue(String.class);
+
+                    if (value != null && (value < min || value > max)) {
+                        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                        String channelId = "vital_sign_alert_channel";
+                        String channelName = "Vital Sign Alert Channel";
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+                            notificationManager.createNotificationChannel(channel);
+                        }
+
+                        Toast.makeText(getApplicationContext(),"Alerta debería notificarse" , Toast.LENGTH_LONG).show();
+
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), channelId)
+                                .setSmallIcon(R.drawable.logo) // Asegúrate de tener este recurso en tu proyecto
+                                .setContentTitle("Alerta de " + measureType)
+                                .setContentText(measureType + ": " + value + " fuera de rango en " + timestamp)
+                                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                .setOngoing(true); // La notificación permanecerá en la barra de notificaciones
+
+                        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors
+            }
+        });
+    }
+
+    private void showDatePickerDialog(OnDateSelectedListener listener) {
+        // Obtener la fecha actual
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                patientDetailActivity.this,
+                (view, year1, month1, dayOfMonth) -> {
+                    String selectedDate = year1 + "-" + String.format("%02d", (month1 + 1)) + "-" + String.format("%02d", dayOfMonth);
+                    listener.onDateSelected(selectedDate);
+                },
+                year, month, day
+        );
+
+        datePickerDialog.show();
+    }
+
+    private interface OnDateSelectedListener {
+        void onDateSelected(String date);
+    }
+
+   private void plotMeasure(DatabaseReference reference, String startDate, String endDate, String label) {
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<Entry> measuresEntries = new ArrayList<>();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+                try {
+                    Date start = dateFormat.parse(startDate);
+                    Date end = dateFormat.parse(endDate);
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Integer value = snapshot.child("Value").getValue(Integer.class);
+                        String Timestampt = snapshot.child("Timestampt").getValue(String.class);
+
+                        if (value != null && Timestampt != null) {
+                            Date timestamp = dateFormat.parse(Timestampt);
+                            if (timestamp != null && !timestamp.before(start) && !timestamp.after(end)) {
+                                measuresEntries.add(new Entry(timestamp.getTime(), value));
+                            }
+                        }
+                    }
+                    // Plot the data
+                    LineDataSet dataSet = new LineDataSet(measuresEntries, label);
+                    LineData lineData = new LineData(dataSet);
+                    chart.setData(lineData);
+
+                    XAxis xAxis = chart.getXAxis();
+                    xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                    xAxis.setGranularity(1f);
+
+                    Description description = new Description();
+                    description.setText(label + " " + getText(R.string.overTime));
+                    chart.setDescription(description);
+
+
+                    chart.getAxisRight().setEnabled(false);
+                    chart.setTouchEnabled(true);
+                    chart.setPinchZoom(true);
+                    chart.invalidate(); // refrescar gráfica
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
+            }
+        });
+    }
+
+    private void plotBloodPressure(DatabaseReference reference, String startDate, String endDate, String label){
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<Entry> spEntries = new ArrayList<>();
+                ArrayList<Entry> dpEntries = new ArrayList<>();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+                try {
+                    Date start = dateFormat.parse(startDate);
+                    Date end = dateFormat.parse(endDate);
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Integer valueSP = snapshot.child("Value SP").getValue(Integer.class);
+                        Integer valueDP = snapshot.child("Value DP").getValue(Integer.class);
+                        String Timestampt = snapshot.child("Timestampt").getValue(String.class);
+
+                        if (valueSP != null && valueDP != null && Timestampt != null) {
+                            Date timestamp = dateFormat.parse(Timestampt);
+                            if (timestamp != null && !timestamp.before(start) && !timestamp.after(end)) {
+                                spEntries.add(new Entry(timestamp.getTime(), valueSP));
+                                dpEntries.add(new Entry(timestamp.getTime(), valueDP));
+                            }
+                        }
+                    }
+                    // Plot the data
+                    LineDataSet dataSet1 = new LineDataSet(spEntries, label);
+                    LineDataSet dataSet2 = new LineDataSet(dpEntries, label);
+                    dataSet1.setColor(ColorTemplate.COLORFUL_COLORS[0]);
+                    dataSet1.setValueTextColor(ColorTemplate.COLORFUL_COLORS[0]);
+                    dataSet2.setColor(ColorTemplate.COLORFUL_COLORS[1]);
+                    dataSet2.setValueTextColor(ColorTemplate.COLORFUL_COLORS[1]);
+                    LineData lineData = new LineData(dataSet1, dataSet2);
+                    chart.setData(lineData);
+
+
+                    XAxis xAxis = chart.getXAxis();
+                    xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                    xAxis.setGranularity(1f);
+
+                    Description description = new Description();
+                    description.setText(label + " " + getText(R.string.overTime));
+                    chart.setDescription(description);
+
+
+                    chart.getAxisRight().setEnabled(false);
+                    chart.setTouchEnabled(true);
+                    chart.setPinchZoom(true);
+                    chart.invalidate(); // refrescar gráfica
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
             }
         });
     }

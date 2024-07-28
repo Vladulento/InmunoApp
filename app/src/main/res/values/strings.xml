@@ -164,6 +164,23 @@
     <string name="listedSymptoms">Los eventos adversos son: </string>
     <string name="deleteSymptoms">Escriba el síntoma a eliminar</string>
     <string name="delete">Borrar</string>
+
+    <string name="selectMeasureType">Escoja primero el tipo:</string>
+
+    <string-array name="measuresTypes">
+        <item>Presión sanguínea</item>
+        <item>Frecuencia respiratoria</item>
+        <item>Frecuencia cardíaca</item>
+        <item>Saturación sanguínea</item>
+    </string-array>
+
+    <string name="starDate">Fecha inicial</string>
+    <string name="endDate">Fecha final</string>
+    <string name="overTime">en el tiempo</string>
+    <string name="bloodPessure">Presión sanguínea</string>
+    <string name="respFreq">Frecuencia respiratoria</string>
+    <string name="cardFreq">Frecuencia cardíaca</string>
+    <string name="satOxygen">Saturación sanguínea</string>
     
     // patientDetailActivity
     
