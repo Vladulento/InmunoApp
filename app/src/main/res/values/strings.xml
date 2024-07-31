@@ -181,6 +181,8 @@
     <string name="respFreq">Frecuencia respiratoria</string>
     <string name="cardFreq">Frecuencia cardíaca</string>
     <string name="satOxygen">Saturación sanguínea</string>
+
+    <string name="generateEHR">Generar fichero pdf con formato EHR</string>
     
     // patientDetailActivity
     
@@ -192,5 +194,28 @@
     <string name="notFoundSymptom">No se ha encontrado el síntoma introducido</string>
     <string name="emptySymptom">Escriba un síntoma antes de añadirlo</string>
 
+    <string name="abdominal_pain">Dolor en el abdomen</string>
+    <string name="asthenia">Astenia</string>
+    <string name="chest_pain">Dolor en el tórax</string>
+    <string name="cough">Tos</string>
+    <string name="dyspnoea">Disnea</string>
+    <string name="nausea">Nusea´s</string>
+    <string name="vomits">Vómitos</string>
+    <string name="bowel_movements_average">Media diaria de las deposiciones: %1$s</string>
+    <string name="consistency">Consistencia de las deposiciones</string>
+    <string name="composition">Las deposiciones contienen</string>
+    <string name="acuosas">Acuosas</string>
+    <string name="liquidas">Líquidas</string>
+    <string name="solidas">Sólidas</string>
+    <string name="sangre">Sangre</string>
+    <string name="mucosidad">Mucosidad</string>
+    <string name="ninguno">Ninguno</string>
+    <string name="relevantSymptom">Los síntomas relevantes de la app del paciente son:</string>
+    <string name="wrongFormatDate">No hay valores entre las fechas escogidas</string>
+    <string name="noPermission">Permiso no concedido, no se te enviarán notificaciones</string>
+    <string name="temperature_alert_title">Alerta de Temperatura Alta</string>
+    <string name="temperature_alert_content">Temperatura: %1$.1f°C fuera de rango en %2$s</string>
+    <string name="measure_alert_title">Alerta de %1$s</string>
+    <string name="measure_alert_content">%1$s: %2$d fuera de rango en %3$s</string>
 
 </resources>

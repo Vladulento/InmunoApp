@@ -1,28 +1,50 @@
 package com.uc3m.InmunoApp.PatientDetail;
+import com.tejpratapsingh.pdfcreator.views.basic.PDFImageView;
+import com.tejpratapsingh.pdfcreator.views.basic.PDFLineSeparatorView;
+import com.tejpratapsingh.pdfcreator.views.basic.PDFVerticalView;
+import com.uc3m.InmunoApp.R;
+
+import android.Manifest;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 
+import android.graphics.Color;
+
+import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
-import android.util.Log;
+
+import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,32 +52,48 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.uc3m.InmunoApp.R;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Calendar;
-import java.util.List;
+import java.util.Set;
+import android.util.Log;
 
-import com.github.mikephil.charting.components.LimitLine;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.utils.ColorTemplate;
+
+import com.tejpratapsingh.pdfcreator.activity.PDFCreatorActivity;
+import com.tejpratapsingh.pdfcreator.utils.PDFUtil;
+import com.tejpratapsingh.pdfcreator.views.PDFBody;
+import com.tejpratapsingh.pdfcreator.views.PDFFooterView;
+import com.tejpratapsingh.pdfcreator.views.PDFHeaderView;
+import com.tejpratapsingh.pdfcreator.views.PDFTableView;
+import com.tejpratapsingh.pdfcreator.views.basic.PDFHorizontalView;
+import com.tejpratapsingh.pdfcreator.views.basic.PDFLineSeparatorView;
+import com.tejpratapsingh.pdfcreator.views.basic.PDFTextView;
+import com.tejpratapsingh.pdfcreator.activity.PDFViewerActivity;
+
+
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class patientDetailActivity extends AppCompatActivity {
     TextView immunotherapyTextView;
@@ -74,7 +112,14 @@ public class patientDetailActivity extends AppCompatActivity {
     private String startDate;
     private String endDate;
     private int selectedMeasure;
-
+    private final Set<String> sentNotifications = new HashSet<>();
+    private static final int REQUEST_CODE_PERMISSIONS = 1;
+    String name, gender, actualImmunotherapy, docName, docEmail;
+    int age, weight, height, docPhone;
+    ArrayList<String> adverseEvents = new ArrayList<>();
+    ArrayList<String> pastImmunotherapies = new ArrayList<>();
+    private Button buttonPDF;
+    private static final int PERMISSION_REQUEST_CODE = 100;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,17 +160,19 @@ public class patientDetailActivity extends AppCompatActivity {
         Button buttonEndDate = findViewById(R.id.end_date);
         symptomsTextView = findViewById(R.id.symptomsTextView);
 
+        buttonPDF = findViewById(R.id.generatePDF);
+
         // Establecer recursos
 
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
 
         Intent intent = getIntent();                                    // Recibir los datos del paciente del Intent anterior
-        String name = intent.getStringExtra("name");
-        String gender = intent.getStringExtra("gender");
-        int age = intent.getIntExtra("age", 0);
-        int weight = intent.getIntExtra("weight", 0);
-        int height = intent.getIntExtra("height", 0);
+        name = intent.getStringExtra("name");
+        gender = intent.getStringExtra("gender");
+        age = intent.getIntExtra("age", 0);
+        weight = intent.getIntExtra("weight", 0);
+        height = intent.getIntExtra("height", 0);
                                                                         // Mostrar en el cardView de información general
         nameTextView.setText(name);
         genderTextView.setText(gender);
@@ -192,7 +239,23 @@ public class patientDetailActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedMeasure = position;        }
+                selectedMeasure = position;
+
+                if(startDate != null && endDate != null){
+
+                    printSymptoms(startDate,endDate);
+
+                    if(selectedMeasure == 0) {
+                        plotBloodPressure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Blood pressure"),startDate, endDate, getString(R.string.bloodPessure));
+                    }else if(selectedMeasure == 1) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Breath rate"), startDate, endDate, getString(R.string.respFreq));
+                    }else if(selectedMeasure == 2) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Heart rate"), startDate, endDate, getString(R.string.cardFreq));
+                    }else if(selectedMeasure == 3) {
+                        plotMeasure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Oxygen saturation"), startDate, endDate, getString(R.string.satOxygen));
+                    }
+                }
+            }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
@@ -203,6 +266,8 @@ public class patientDetailActivity extends AppCompatActivity {
             if (startDate != null) {
                 buttonStartDate.setText(startDate);
                 if(endDate != null){
+
+                    printSymptoms(startDate,endDate);
 
                     if(selectedMeasure == 0) {
                         plotBloodPressure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Blood pressure"),startDate, endDate, getString(R.string.bloodPessure));
@@ -224,6 +289,8 @@ public class patientDetailActivity extends AppCompatActivity {
                 buttonEndDate.setText(endDate);
                 if(startDate != null){
 
+                    printSymptoms(startDate,endDate);
+
                     if(selectedMeasure == 0) {
                         plotBloodPressure(FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Blood pressure"),startDate, endDate, getString(R.string.bloodPessure));
                     }else if(selectedMeasure == 1) {
@@ -237,6 +304,27 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         }));
 
+        getClinicalData();
+        getDoctor1();
+
+        buttonPDF.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pdfUtil.generatePDF(createPDFViews(), "patient_details", new PDFUtil.PDFUtilListener() {
+                    @Override
+                    public void pdfGenerationSuccess(File savedPDFFile) {
+                        Toast.makeText(patientDetailActivity.this, "PDF Created", Toast.LENGTH_SHORT).show();
+                        onNextClicked(savedPDFFile);
+                    }
+
+                    @Override
+                    public void pdfGenerationFailure(Exception exception) {
+                        Toast.makeText(patientDetailActivity.this, "PDF NOT Created", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
         // Llamada a funciones
 
         getTreatmentsP1();      // Leer los valores de los tratamientos del paciente 1
@@ -249,9 +337,34 @@ public class patientDetailActivity extends AppCompatActivity {
 
         getSymptomsP1();        // Leer los síntomas del paciente 1
 
-        notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1")); // Listener de notificaciones
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        REQUEST_CODE_PERMISSIONS);
+            } else {
+                notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1"));
+            }
+        } else {
+            notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1"));
+        }
 
-         // Actualizar el gráfico
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1"));
+
+            } else {
+                Toast.makeText(this, R.string.noPermission, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     // Función para gestionar la dinámica de los CardViews
@@ -591,12 +704,14 @@ public class patientDetailActivity extends AppCompatActivity {
                 Integer heartRateMax = dataSnapshot.child("Heart rate").child("Max").getValue(Integer.class);
                 Integer respRateMin = dataSnapshot.child("Respiration rate").child("Min").getValue(Integer.class);
                 Integer respRateMax = dataSnapshot.child("Respiration rate").child("Max").getValue(Integer.class);
+                Double tempMax = dataSnapshot.child("Temperature").child("Max").getValue(Double.class);
 
                 // Ahora configura el listener para las medidas de Heart rate y Respiration rate
                 if (heartRateMin != null && heartRateMax != null && respRateMin != null && respRateMax != null) {
                     // Configurar el listener para las medidas de Heart rate y Respiration rate
-                    addMeasureListener(measuresRef.child("Heart rate"), heartRateMin, heartRateMax, "Heart rate");
-                    addMeasureListener(measuresRef.child("Breath rate"), respRateMin, respRateMax, "Respiration rate");
+                    addMeasureListener(measuresRef.child("Heart rate"), heartRateMin, heartRateMax, getString(R.string.cardFreq));
+                    addMeasureListener(measuresRef.child("Breath rate"), respRateMin, respRateMax, getString(R.string.respFreq));
+                    addTemperatureListener(measuresRef.child("Sympthoms"), tempMax);
                 }
             }
             @Override
@@ -611,37 +726,102 @@ public class patientDetailActivity extends AppCompatActivity {
         measureRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                String channelId = "vital_sign_alert_channel";
+                String channelName = "Vital Sign Alert Channel";
+
+                // Crear canal de notificaciones si es necesario
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+                    notificationManager.createNotificationChannel(channel);
+                }
+
                 for (DataSnapshot measureSnapshot : dataSnapshot.getChildren()) {
                     Integer value = measureSnapshot.child("Value").getValue(Integer.class);
                     String timestamp = measureSnapshot.child("Timestamp").getValue(String.class);
 
                     if (value != null && (value < min || value > max)) {
-                        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                        String channelId = "vital_sign_alert_channel";
-                        String channelName = "Vital Sign Alert Channel";
+                        String notificationKey = timestamp + "_" + value;
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
-                            notificationManager.createNotificationChannel(channel);
+                        // Verificar si ya se ha enviado una notificación para este valor y timestamp
+                        if (!sentNotifications.contains(notificationKey)) {
+                            // Crear notificación
+                            String contentTitle = getString(R.string.measure_alert_title, measureType);
+                            String contentText = getString(R.string.measure_alert_content, measureType, value, timestamp);
+
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(patientDetailActivity.this, channelId)
+                                    .setSmallIcon(R.mipmap.ic_notification) // Asegúrate de tener este recurso en tu proyecto
+                                    .setContentTitle(contentTitle)
+                                    .setContentText(contentText)
+                                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                    .setAutoCancel(true); // La notificación se eliminará cuando se toque
+
+                            // Mostrar notificación
+                            int notificationId = (int) System.currentTimeMillis(); // O cualquier otro mecanismo único
+                            notificationManager.notify(notificationId, builder.build());
+
+                            // Registrar la notificación como enviada
+                            sentNotifications.add(notificationKey);
                         }
-
-                        Toast.makeText(getApplicationContext(),"Alerta debería notificarse" , Toast.LENGTH_LONG).show();
-
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), channelId)
-                                .setSmallIcon(R.drawable.logo) // Asegúrate de tener este recurso en tu proyecto
-                                .setContentTitle("Alerta de " + measureType)
-                                .setContentText(measureType + ": " + value + " fuera de rango en " + timestamp)
-                                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                .setOngoing(true); // La notificación permanecerá en la barra de notificaciones
-
-                        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
                     }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle possible errors
+                // Manejar posibles errores aquí
+                Log.e("DatabaseError", "Error al leer datos: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void addTemperatureListener(DatabaseReference measureRef, double max) {
+        measureRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                String channelId = "temperature_alert_channel";
+                String channelName = "Temperature Alert Channel";
+
+                // Crear canal de notificaciones si es necesario
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+                    notificationManager.createNotificationChannel(channel);
+                }
+
+                for (DataSnapshot measureSnapshot : dataSnapshot.getChildren()) {
+                    Double temperature = measureSnapshot.child("Temperature").getValue(Double.class);
+                    String timestamp = measureSnapshot.child("Timestamp").getValue(String.class);
+
+                    if (temperature != null && temperature > max) {
+                        String notificationKey = timestamp + "_" + temperature;
+
+                        // Verificar si ya se ha enviado una notificación para este valor y timestamp
+                        if (!sentNotifications.contains(notificationKey)) {
+                            // Crear notificación
+                            String contentText = getString(R.string.temperature_alert_content, temperature, timestamp);
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(patientDetailActivity.this, channelId)
+                                    .setSmallIcon(R.mipmap.ic_notification) // Asegúrate de tener este recurso en tu proyecto
+                                    .setContentTitle(getString(R.string.temperature_alert_title))
+                                    .setContentText(contentText)
+                                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                    .setAutoCancel(true); // La notificación se eliminará cuando se toque
+
+                            // Mostrar notificación
+                            int notificationId = (int) System.currentTimeMillis(); // O cualquier otro mecanismo único
+                            notificationManager.notify(notificationId, builder.build());
+
+                            // Registrar la notificación como enviada
+                            sentNotifications.add(notificationKey);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Manejar posibles errores aquí
+                Log.e("DatabaseError", "Error al leer datos: " + databaseError.getMessage());
             }
         });
     }
@@ -661,7 +841,6 @@ public class patientDetailActivity extends AppCompatActivity {
                 },
                 year, month, day
         );
-
         datePickerDialog.show();
     }
 
@@ -675,43 +854,64 @@ public class patientDetailActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 ArrayList<Entry> measuresEntries = new ArrayList<>();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                boolean missingData = false;
 
                 try {
                     Date start = dateFormat.parse(startDate);
                     Date end = dateFormat.parse(endDate);
 
+                    if (start == null || end == null) {
+                        Log.e("plotMeasure", "Start or end date is null");
+                        return;
+                    }
+
+                    // Create a set of all dates within the range
+                    Set<String> expectedDates = new HashSet<>();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(start);
+
+                    while (!calendar.getTime().after(end)) {
+                        expectedDates.add(dateFormat.format(calendar.getTime()));
+                        calendar.add(Calendar.DATE, 1);
+                    }
+
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         Integer value = snapshot.child("Value").getValue(Integer.class);
-                        String Timestampt = snapshot.child("Timestampt").getValue(String.class);
+                        String timestampStr = snapshot.child("Timestampt").getValue(String.class);
 
-                        if (value != null && Timestampt != null) {
-                            Date timestamp = dateFormat.parse(Timestampt);
+                        if (value != null && timestampStr != null) {
+                            Date timestamp = dateFormat.parse(timestampStr);
                             if (timestamp != null && !timestamp.before(start) && !timestamp.after(end)) {
                                 measuresEntries.add(new Entry(timestamp.getTime(), value));
+                                expectedDates.remove(timestampStr);
                             }
                         }
                     }
-                    // Plot the data
+
+                    if (!expectedDates.isEmpty()) {
+                        missingData = true;
+                    }
+
+                    if (missingData || measuresEntries.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), R.string.wrongFormatDate, Toast.LENGTH_LONG).show();
+                        chart.clear();
+                        return;
+                    }
+
                     LineDataSet dataSet = new LineDataSet(measuresEntries, label);
+                    dataSet.setColor(Color.RED);
                     LineData lineData = new LineData(dataSet);
+
                     chart.setData(lineData);
-
-                    XAxis xAxis = chart.getXAxis();
-                    xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-                    xAxis.setGranularity(1f);
-
-                    Description description = new Description();
-                    description.setText(label + " " + getText(R.string.overTime));
-                    chart.setDescription(description);
-
-
                     chart.getAxisRight().setEnabled(false);
+                    chart.getXAxis().setEnabled(false);
+                    chart.getDescription().setEnabled(false);
                     chart.setTouchEnabled(true);
                     chart.setPinchZoom(true);
-                    chart.invalidate(); // refrescar gráfica
+                    chart.invalidate(); // Refresh chart
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("plotMeasure", "Error parsing dates or setting up the chart", e);
                 }
             }
             @Override
@@ -728,27 +928,54 @@ public class patientDetailActivity extends AppCompatActivity {
                 ArrayList<Entry> spEntries = new ArrayList<>();
                 ArrayList<Entry> dpEntries = new ArrayList<>();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                boolean missingData = false;
 
                 try {
                     Date start = dateFormat.parse(startDate);
                     Date end = dateFormat.parse(endDate);
 
+                    if (start == null || end == null) {
+                        Log.e("plotBloodPressure", "Start or end date is null");
+                        return;
+                    }
+
+                    // Create a set of all dates within the range
+                    Set<String> expectedDates = new HashSet<>();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(start);
+
+                    while (!calendar.getTime().after(end)) {
+                        expectedDates.add(dateFormat.format(calendar.getTime()));
+                        calendar.add(Calendar.DATE, 1);
+                    }
+
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         Integer valueSP = snapshot.child("Value SP").getValue(Integer.class);
                         Integer valueDP = snapshot.child("Value DP").getValue(Integer.class);
-                        String Timestampt = snapshot.child("Timestampt").getValue(String.class);
+                        String timestampStr = snapshot.child("Timestampt").getValue(String.class);
 
-                        if (valueSP != null && valueDP != null && Timestampt != null) {
-                            Date timestamp = dateFormat.parse(Timestampt);
+                        if (valueSP != null && valueDP != null && timestampStr != null) {
+                            Date timestamp = dateFormat.parse(timestampStr);
                             if (timestamp != null && !timestamp.before(start) && !timestamp.after(end)) {
                                 spEntries.add(new Entry(timestamp.getTime(), valueSP));
                                 dpEntries.add(new Entry(timestamp.getTime(), valueDP));
+                                expectedDates.remove(timestampStr);
                             }
                         }
                     }
-                    // Plot the data
-                    LineDataSet dataSet1 = new LineDataSet(spEntries, label);
-                    LineDataSet dataSet2 = new LineDataSet(dpEntries, label);
+
+                    if (!expectedDates.isEmpty()) {
+                        missingData = true;
+                    }
+
+                    if (missingData || spEntries.isEmpty() || dpEntries.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), R.string.wrongFormatDate, Toast.LENGTH_LONG).show();
+                        chart.clear();
+                        return;
+                    }
+
+                    LineDataSet dataSet1 = new LineDataSet(spEntries, label + " SP");
+                    LineDataSet dataSet2 = new LineDataSet(dpEntries, label + " DP");
                     dataSet1.setColor(ColorTemplate.COLORFUL_COLORS[0]);
                     dataSet1.setValueTextColor(ColorTemplate.COLORFUL_COLORS[0]);
                     dataSet2.setColor(ColorTemplate.COLORFUL_COLORS[1]);
@@ -756,23 +983,206 @@ public class patientDetailActivity extends AppCompatActivity {
                     LineData lineData = new LineData(dataSet1, dataSet2);
                     chart.setData(lineData);
 
-
-                    XAxis xAxis = chart.getXAxis();
-                    xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-                    xAxis.setGranularity(1f);
-
-                    Description description = new Description();
-                    description.setText(label + " " + getText(R.string.overTime));
-                    chart.setDescription(description);
-
-
                     chart.getAxisRight().setEnabled(false);
+                    chart.getXAxis().setEnabled(false);
+                    chart.getDescription().setEnabled(false);
                     chart.setTouchEnabled(true);
                     chart.setPinchZoom(true);
-                    chart.invalidate(); // refrescar gráfica
+                    chart.invalidate(); // Refresh chart
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("plotBloodPressure", "Error parsing dates or setting up the chart", e);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
+            }
+        });
+    }
+
+    private void printSymptoms(String startDate, String endDate){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Sympthoms");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Map<String, Integer> symptomsCount = new HashMap<>();
+                Map<String, Integer> consistencyCount = new HashMap<>();
+                Map<String, Integer> compositionCount = new HashMap<>();
+                int totalDepositions = 0;
+                int depositionsCount = 0;
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                boolean missingData = false;
+
+                try {
+                    Date start = dateFormat.parse(startDate);
+                    Date end = dateFormat.parse(endDate);
+
+                    if (start == null || end == null) {
+                        Log.e("printSymptoms", "Start or end date is null");
+                        return;
+                    }
+
+                    // Create a set of all dates within the range
+                    Set<String> expectedDates = new HashSet<>();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(start);
+
+                    while (!calendar.getTime().after(end)) {
+                        expectedDates.add(dateFormat.format(calendar.getTime()));
+                        calendar.add(Calendar.DATE, 1);
+                    }
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        String timestampStr = snapshot.child("Timestampt").getValue(String.class);
+                        if (timestampStr != null) {
+                            Date timestamp = dateFormat.parse(timestampStr);
+                            if (timestamp != null && !timestamp.before(start) && !timestamp.after(end)) {
+                                for (DataSnapshot symptomSnapshot : snapshot.getChildren()) {
+                                    String key = symptomSnapshot.getKey();
+                                    Object value = symptomSnapshot.getValue();
+
+                                    if (value instanceof Boolean && (Boolean) value) {
+                                        if (key != null) {
+                                            symptomsCount.put(key, symptomsCount.getOrDefault(key, 0) + 1);
+                                        }
+                                    }
+
+                                    if ("Bowel movements".equals(key)) {
+                                        Integer numberOfDepositions = symptomSnapshot.child("Number of depositions").getValue(Integer.class);
+                                        String consistency = symptomSnapshot.child("Consistency").getValue(String.class);
+                                        String composition = symptomSnapshot.child("Composition").getValue(String.class);
+
+                                        if (numberOfDepositions != null) {
+                                            totalDepositions += numberOfDepositions;
+                                            depositionsCount++;
+                                        }
+
+                                        if (consistency != null) {
+                                            consistencyCount.put(consistency, consistencyCount.getOrDefault(consistency, 0) + 1);
+                                        }
+
+                                        if (composition != null) {
+                                            compositionCount.put(composition, compositionCount.getOrDefault(composition, 0) + 1);
+                                        }
+                                    }
+                                }
+                                expectedDates.remove(timestampStr);
+                            }
+                        }
+                    }
+
+                    if (!expectedDates.isEmpty()) {
+                        missingData = true;
+                    }
+
+                    if (missingData) {
+                        Log.w("printSymptoms", "Missing data entries for some dates within the given range.");
+                        symptomsTextView.setText(""); // Clear the text view if data is missing
+                        return;
+                    }
+
+                    StringBuilder displayText = new StringBuilder();
+                    // Filtrar y mostrar síntomas booleanos que se repiten al menos 3 veces
+                    for (Map.Entry<String, Integer> entry : symptomsCount.entrySet()) {
+                        if (entry.getValue() >= 3) {
+                            int symptomStringId = getResources().getIdentifier(entry.getKey().toLowerCase(Locale.ROOT).replace(" ", "_"), "string", getPackageName());
+                            if (symptomStringId != 0) {
+                                displayText.append(getString(symptomStringId)).append("\n");
+                            } else {
+                                displayText.append(entry.getKey()).append("\n");
+                            }
+                        }
+                    }
+
+                    // Filtrar y mostrar consistencias que se repiten al menos 3 veces
+                    for (Map.Entry<String, Integer> entry : consistencyCount.entrySet()) {
+                        if (entry.getValue() >= 3) {
+                            int consistencyStringId = getResources().getIdentifier(entry.getKey().toLowerCase(Locale.ROOT), "string", getPackageName());
+                            if (consistencyStringId != 0) {
+                                displayText.append(getString(R.string.consistency)).append(": ").append(getString(consistencyStringId)).append("\n");
+                            } else {
+                                displayText.append(getString(R.string.consistency)).append(": ").append(entry.getKey()).append("\n");
+                            }
+                        }
+                    }
+
+                    // Filtrar y mostrar composiciones que se repiten al menos 3 veces
+                    for (Map.Entry<String, Integer> entry : compositionCount.entrySet()) {
+                        if (entry.getValue() >= 3) {
+                            int compositionStringId = getResources().getIdentifier(entry.getKey().toLowerCase(Locale.ROOT), "string", getPackageName());
+                            if (compositionStringId != 0) {
+                                displayText.append(getString(R.string.composition)).append(": ").append(getString(compositionStringId)).append("\n");
+                            } else {
+                                displayText.append(getString(R.string.composition)).append(": ").append(entry.getKey()).append("\n");
+                            }
+                        }
+                    }
+
+                    // Calcular y mostrar la media de "Number of depositions"
+                    if (depositionsCount > 0) {
+                        double averageDepositions = (double) totalDepositions / depositionsCount;
+                        displayText.append(getString(R.string.bowel_movements_average, String.format(Locale.getDefault(), "%.2f", averageDepositions))).append("\n");
+                    }
+
+                    symptomsTextView.setText(displayText.toString());
+
+                } catch (Exception e) {
+                    Log.e("printSymptoms", "Error parsing dates or setting up the text view", e);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Manejo de errores
+            }
+        });
+    }
+
+    private void getClinicalData(){
+        adverseEvents.clear();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data");
+        reference.child("Adverse events").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String symptom = snapshot.getValue(String.class);
+                    adverseEvents.add(symptom);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
+            }
+        });
+        reference.child("Treatment").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String treatment = snapshot.getValue(String.class);
+                    pastImmunotherapies.add(treatment);
+                }
+                actualImmunotherapy = pastImmunotherapies.get(pastImmunotherapies.size()-1);
+                pastImmunotherapies.remove(pastImmunotherapies.size()-1);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
+            }
+        });
+    }
+
+    private void getDoctor1(){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Oncology team contact").child("Doctor 1");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    docName = snapshot.child("Name").getValue(String.class);
+                    docEmail = snapshot.child("Mail").getValue(String.class);
+                    docPhone = snapshot.child("Phone").getValue(Integer.class);
                 }
             }
             @Override
@@ -781,4 +1191,143 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected PDFHeaderView getHeaderView(int pageIndex) {
+        PDFHeaderView headerView = new PDFHeaderView(getApplicationContext());
+
+        PDFHorizontalView horizontalView = new PDFHorizontalView(getApplicationContext());
+
+        PDFTextView pdfTextView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.HEADER);
+        SpannableString word = new SpannableString("Patient Detail Report");
+        word.setSpan(new ForegroundColorSpan(Color.DKGRAY), 0, word.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        pdfTextView.setText(word);
+        pdfTextView.setLayout(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT, 1));
+        pdfTextView.getView().setGravity(Gravity.CENTER_VERTICAL);
+        pdfTextView.getView().setTypeface(pdfTextView.getView().getTypeface(), Typeface.BOLD);
+
+        horizontalView.addView(pdfTextView);
+
+        headerView.addView(horizontalView);
+
+        PDFLineSeparatorView lineSeparatorView1 = new PDFLineSeparatorView(getApplicationContext()).setBackgroundColor(Color.BLACK);
+        headerView.addView(lineSeparatorView1);
+
+        return headerView;
+    }
+
+    @Override
+    protected PDFBody getBodyViews() {
+        PDFBody pdfBody = new PDFBody();
+
+        PDFTextView pdfTitleView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.H3);
+        pdfTitleView.setText("Patient Details");
+        pdfBody.addView(pdfTitleView);
+
+        PDFLineSeparatorView lineSeparatorView1 = new PDFLineSeparatorView(getApplicationContext()).setBackgroundColor(Color.BLACK);
+        pdfBody.addView(lineSeparatorView1);
+
+        PDFTextView pdfNameView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfNameView.setText("Name: " + name);
+        pdfBody.addView(pdfNameView);
+
+        PDFTextView pdfGenderView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfGenderView.setText("Gender: " + gender);
+        pdfBody.addView(pdfGenderView);
+
+        PDFTextView pdfAgeView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfAgeView.setText("Age: " + age);
+        pdfBody.addView(pdfAgeView);
+
+        PDFTextView pdfWeightView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfWeightView.setText("Weight: " + weight);
+        pdfBody.addView(pdfWeightView);
+
+        PDFTextView pdfHeightView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfHeightView.setText("Height: " + height);
+        pdfBody.addView(pdfHeightView);
+
+        PDFTextView pdfActualImmunotherapyView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfActualImmunotherapyView.setText("Current Immunotherapy: " + actualImmunotherapy);
+        pdfBody.addView(pdfActualImmunotherapyView);
+
+        PDFTextView pdfDocNameView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfDocNameView.setText("Doctor Name: " + docName);
+        pdfBody.addView(pdfDocNameView);
+
+        PDFTextView pdfDocEmailView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfDocEmailView.setText("Doctor Email: " + docEmail);
+        pdfBody.addView(pdfDocEmailView);
+
+        PDFTextView pdfDocPhoneView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfDocPhoneView.setText("Doctor Phone: " + docPhone);
+        pdfBody.addView(pdfDocPhoneView);
+
+        PDFTextView pdfAdverseEventsView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+        pdfAdverseEventsView.setText("Adverse Events: " + String.join(", ", adverseEvents));
+        pdfBody.addView(pdfAdverseEventsView);
+
+        if (!pastImmunotherapies.isEmpty()) {
+            PDFTextView pdfPastImmunotherapiesView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
+            pdfPastImmunotherapiesView.setText("Past Immunotherapies: " + String.join(", ", pastImmunotherapies));
+            pdfBody.addView(pdfPastImmunotherapiesView);
+        }
+
+        PDFLineSeparatorView lineSeparatorView2 = new PDFLineSeparatorView(getApplicationContext()).setBackgroundColor(Color.BLACK);
+        pdfBody.addView(lineSeparatorView2);
+
+        PDFTextView pdfFooterNoteView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.SMALL);
+        pdfFooterNoteView.setText("Generated by InmunoApp - Using Latest Version");
+        pdfBody.addView(pdfFooterNoteView);
+
+        return pdfBody;
+    }
+
+    @Override
+    protected PDFFooterView getFooterView(int pageIndex) {
+        PDFFooterView footerView = new PDFFooterView(getApplicationContext());
+
+        PDFTextView pdfTextViewPage = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.SMALL);
+        pdfTextViewPage.setText(String.format(Locale.getDefault(), "Page: %d", pageIndex + 1));
+        pdfTextViewPage.setLayout(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT, 0));
+        pdfTextViewPage.getView().setGravity(Gravity.CENTER_HORIZONTAL);
+
+        footerView.addView(pdfTextViewPage);
+
+        return footerView;
+    }
+
+    @Nullable
+    @Override
+    protected PDFImageView getWatermarkView(int forPage) {
+        PDFImageView pdfImageView = new PDFImageView(getApplicationContext());
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                200, Gravity.CENTER);
+        pdfImageView.setLayoutParams(params);
+
+        pdfImageView.setImageResource(R.mipmap.ic_notification); // Ajustar según sea necesario
+        pdfImageView.setImageScale(ImageView.ScaleType.FIT_CENTER);
+        pdfImageView.getView().setAlpha(0.3F);
+
+        return pdfImageView;
+    }
+
+    @Override
+    protected void onNextClicked(final File savedPDFFile) {
+        Uri pdfUri = Uri.fromFile(savedPDFFile);
+
+        Intent intentPdfViewer = new Intent(patientDetailActivity.this, PDFViewerActivity.class); // Ajustar el nombre de la actividad
+        intentPdfViewer.putExtra(PDFViewerActivity.PDF_FILE_URI, pdfUri);
+
+        startActivity(intentPdfViewer);
+    }
+
+
+    
 }

@@ -677,6 +677,15 @@
                         android:text="Aquí va el resultado de la BBDD"
                         android:textColor="@color/black"/>
 
+                    <Button
+                        android:id="@+id/generatePDF"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/generateEHR"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/bkgButton"
+                        android:layout_gravity="center"/>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -775,11 +784,22 @@
                         android:layout_marginTop="10dp" />
 
                     <TextView
+                        android:id="@+id/relevantSymptomsTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/relevantSymptom"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"/>
+
+                    <TextView
                         android:id="@+id/symptomsTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:textSize="16sp" />
+                        android:layout_marginStart="30dp"
+                        android:textSize="14sp"
+                        android:textColor="@color/black"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
