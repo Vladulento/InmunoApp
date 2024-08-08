@@ -1,13 +1,10 @@
 package com.uc3m.InmunoApp.PatientDetail;
-import com.tejpratapsingh.pdfcreator.views.basic.PDFImageView;
-import com.tejpratapsingh.pdfcreator.views.basic.PDFLineSeparatorView;
-import com.tejpratapsingh.pdfcreator.views.basic.PDFVerticalView;
+
 import com.uc3m.InmunoApp.R;
 
 import android.Manifest;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -25,26 +22,19 @@ import android.content.pm.PackageManager;
 
 import android.graphics.Color;
 
-import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
 
-import android.text.style.ForegroundColorSpan;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 
-import android.view.ViewGroup;
+import android.util.Log;
+
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -59,6 +49,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,7 +61,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Calendar;
 import java.util.Set;
-import android.util.Log;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -77,23 +68,10 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
-import com.tejpratapsingh.pdfcreator.activity.PDFCreatorActivity;
-import com.tejpratapsingh.pdfcreator.utils.PDFUtil;
-import com.tejpratapsingh.pdfcreator.views.PDFBody;
-import com.tejpratapsingh.pdfcreator.views.PDFFooterView;
-import com.tejpratapsingh.pdfcreator.views.PDFHeaderView;
-import com.tejpratapsingh.pdfcreator.views.PDFTableView;
-import com.tejpratapsingh.pdfcreator.views.basic.PDFHorizontalView;
-import com.tejpratapsingh.pdfcreator.views.basic.PDFLineSeparatorView;
-import com.tejpratapsingh.pdfcreator.views.basic.PDFTextView;
-import com.tejpratapsingh.pdfcreator.activity.PDFViewerActivity;
-
-
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Table;
 
 public class patientDetailActivity extends AppCompatActivity {
     TextView immunotherapyTextView;
@@ -115,11 +93,11 @@ public class patientDetailActivity extends AppCompatActivity {
     private final Set<String> sentNotifications = new HashSet<>();
     private static final int REQUEST_CODE_PERMISSIONS = 1;
     String name, gender, actualImmunotherapy, docName, docEmail;
-    int age, weight, height, docPhone;
+    int age, weight, height;
+    Integer docPhone;
     ArrayList<String> adverseEvents = new ArrayList<>();
     ArrayList<String> pastImmunotherapies = new ArrayList<>();
-    private Button buttonPDF;
-    private static final int PERMISSION_REQUEST_CODE = 100;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,7 +138,7 @@ public class patientDetailActivity extends AppCompatActivity {
         Button buttonEndDate = findViewById(R.id.end_date);
         symptomsTextView = findViewById(R.id.symptomsTextView);
 
-        buttonPDF = findViewById(R.id.generatePDF);
+        Button buttonPDF = findViewById(R.id.generatePDF);
 
         // Establecer recursos
 
@@ -204,8 +182,7 @@ public class patientDetailActivity extends AppCompatActivity {
 
         // Botón de chat
         launchButton.setOnClickListener(v -> {
-            Intent intent1 = new Intent(patientDetailActivity.this, ChatActivity.class);
-            startActivity(intent1);
+            // do something
         });
 
         // Encontrar el valor del spinner anterior
@@ -307,23 +284,7 @@ public class patientDetailActivity extends AppCompatActivity {
         getClinicalData();
         getDoctor1();
 
-        buttonPDF.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pdfUtil.generatePDF(createPDFViews(), "patient_details", new PDFUtil.PDFUtilListener() {
-                    @Override
-                    public void pdfGenerationSuccess(File savedPDFFile) {
-                        Toast.makeText(patientDetailActivity.this, "PDF Created", Toast.LENGTH_SHORT).show();
-                        onNextClicked(savedPDFFile);
-                    }
-
-                    @Override
-                    public void pdfGenerationFailure(Exception exception) {
-                        Toast.makeText(patientDetailActivity.this, "PDF NOT Created", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
+        buttonPDF.setOnClickListener(v -> createPdf(patientDetailActivity.this));
 
         // Llamada a funciones
 
@@ -357,10 +318,11 @@ public class patientDetailActivity extends AppCompatActivity {
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        //Notificaciones
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1"));
-
             } else {
                 Toast.makeText(this, R.string.noPermission, Toast.LENGTH_LONG).show();
             }
@@ -738,7 +700,7 @@ public class patientDetailActivity extends AppCompatActivity {
 
                 for (DataSnapshot measureSnapshot : dataSnapshot.getChildren()) {
                     Integer value = measureSnapshot.child("Value").getValue(Integer.class);
-                    String timestamp = measureSnapshot.child("Timestamp").getValue(String.class);
+                    String timestamp = measureSnapshot.child("Timestampt").getValue(String.class);
 
                     if (value != null && (value < min || value > max)) {
                         String notificationKey = timestamp + "_" + value;
@@ -750,7 +712,7 @@ public class patientDetailActivity extends AppCompatActivity {
                             String contentText = getString(R.string.measure_alert_content, measureType, value, timestamp);
 
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(patientDetailActivity.this, channelId)
-                                    .setSmallIcon(R.mipmap.ic_notification) // Asegúrate de tener este recurso en tu proyecto
+                                    .setSmallIcon(R.drawable.baseline_person_search_24) // Asegúrate de tener este recurso en tu proyecto
                                     .setContentTitle(contentTitle)
                                     .setContentText(contentText)
                                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -791,7 +753,7 @@ public class patientDetailActivity extends AppCompatActivity {
 
                 for (DataSnapshot measureSnapshot : dataSnapshot.getChildren()) {
                     Double temperature = measureSnapshot.child("Temperature").getValue(Double.class);
-                    String timestamp = measureSnapshot.child("Timestamp").getValue(String.class);
+                    String timestamp = measureSnapshot.child("Timestampt").getValue(String.class);
 
                     if (temperature != null && temperature > max) {
                         String notificationKey = timestamp + "_" + temperature;
@@ -801,7 +763,7 @@ public class patientDetailActivity extends AppCompatActivity {
                             // Crear notificación
                             String contentText = getString(R.string.temperature_alert_content, temperature, timestamp);
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(patientDetailActivity.this, channelId)
-                                    .setSmallIcon(R.mipmap.ic_notification) // Asegúrate de tener este recurso en tu proyecto
+                                    .setSmallIcon(R.drawable.baseline_person_search_24) // Asegúrate de tener este recurso en tu proyecto
                                     .setContentTitle(getString(R.string.temperature_alert_title))
                                     .setContentText(contentText)
                                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -1192,142 +1154,62 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected PDFHeaderView getHeaderView(int pageIndex) {
-        PDFHeaderView headerView = new PDFHeaderView(getApplicationContext());
+    private void createPdf(Context context) {
+        try {
+            // Ruta donde se guardará el PDF
+            File file = new File(context.getFilesDir(), "patient_info.pdf");
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
 
-        PDFHorizontalView horizontalView = new PDFHorizontalView(getApplicationContext());
+            // Inicializar el escritor de PDF
+            PdfWriter writer = new PdfWriter(fileOutputStream);
+            PdfDocument pdfDoc = new PdfDocument(writer);
+            Document document = new Document(pdfDoc);
 
-        PDFTextView pdfTextView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.HEADER);
-        SpannableString word = new SpannableString("Patient Detail Report");
-        word.setSpan(new ForegroundColorSpan(Color.DKGRAY), 0, word.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        pdfTextView.setText(word);
-        pdfTextView.setLayout(new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        pdfTextView.getView().setGravity(Gravity.CENTER_VERTICAL);
-        pdfTextView.getView().setTypeface(pdfTextView.getView().getTypeface(), Typeface.BOLD);
+            // Crear la tabla
+            float[] columnWidths = {1, 3};
+            Table table = new Table(columnWidths);
 
-        horizontalView.addView(pdfTextView);
+            // Añadir la información del paciente
+            table.addCell("Nombre:");
+            table.addCell(name);
+            table.addCell("Edad:");
+            table.addCell(String.valueOf(age));
+            table.addCell("Género:");
+            table.addCell(gender);
+            table.addCell("Altura:");
+            table.addCell(String.valueOf(height));
+            table.addCell("Peso:");
+            table.addCell(String.valueOf(weight));
 
-        headerView.addView(horizontalView);
+            // Añadir la información clínica
+            table.addCell("Inmunoterapia Actual:");
+            table.addCell(actualImmunotherapy);
+            table.addCell("Inmunoterapias Pasadas:");
+            table.addCell(String.valueOf(pastImmunotherapies));
+            table.addCell("Eventos Adversos:");
+            table.addCell(String.valueOf(adverseEvents));
 
-        PDFLineSeparatorView lineSeparatorView1 = new PDFLineSeparatorView(getApplicationContext()).setBackgroundColor(Color.BLACK);
-        headerView.addView(lineSeparatorView1);
+            // Añadir la información del equipo médico
+            table.addCell("Nombre del Médico:");
+            table.addCell(docName);
+            table.addCell("Correo del Médico:");
+            table.addCell(docEmail);
+            table.addCell("Teléfono del Médico:");
+            table.addCell(String.valueOf(docPhone));
 
-        return headerView;
-    }
+            // Añadir la tabla al documento
+            document.add(table);
 
-    @Override
-    protected PDFBody getBodyViews() {
-        PDFBody pdfBody = new PDFBody();
+            // Cerrar el documento
+            document.close();
+            writer.close();
 
-        PDFTextView pdfTitleView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.H3);
-        pdfTitleView.setText("Patient Details");
-        pdfBody.addView(pdfTitleView);
+            // Confirmación de creación
+            Toast.makeText(context, "PDF generado con éxito en: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
 
-        PDFLineSeparatorView lineSeparatorView1 = new PDFLineSeparatorView(getApplicationContext()).setBackgroundColor(Color.BLACK);
-        pdfBody.addView(lineSeparatorView1);
-
-        PDFTextView pdfNameView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfNameView.setText("Name: " + name);
-        pdfBody.addView(pdfNameView);
-
-        PDFTextView pdfGenderView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfGenderView.setText("Gender: " + gender);
-        pdfBody.addView(pdfGenderView);
-
-        PDFTextView pdfAgeView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfAgeView.setText("Age: " + age);
-        pdfBody.addView(pdfAgeView);
-
-        PDFTextView pdfWeightView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfWeightView.setText("Weight: " + weight);
-        pdfBody.addView(pdfWeightView);
-
-        PDFTextView pdfHeightView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfHeightView.setText("Height: " + height);
-        pdfBody.addView(pdfHeightView);
-
-        PDFTextView pdfActualImmunotherapyView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfActualImmunotherapyView.setText("Current Immunotherapy: " + actualImmunotherapy);
-        pdfBody.addView(pdfActualImmunotherapyView);
-
-        PDFTextView pdfDocNameView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfDocNameView.setText("Doctor Name: " + docName);
-        pdfBody.addView(pdfDocNameView);
-
-        PDFTextView pdfDocEmailView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfDocEmailView.setText("Doctor Email: " + docEmail);
-        pdfBody.addView(pdfDocEmailView);
-
-        PDFTextView pdfDocPhoneView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfDocPhoneView.setText("Doctor Phone: " + docPhone);
-        pdfBody.addView(pdfDocPhoneView);
-
-        PDFTextView pdfAdverseEventsView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-        pdfAdverseEventsView.setText("Adverse Events: " + String.join(", ", adverseEvents));
-        pdfBody.addView(pdfAdverseEventsView);
-
-        if (!pastImmunotherapies.isEmpty()) {
-            PDFTextView pdfPastImmunotherapiesView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.P);
-            pdfPastImmunotherapiesView.setText("Past Immunotherapies: " + String.join(", ", pastImmunotherapies));
-            pdfBody.addView(pdfPastImmunotherapiesView);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_LONG).show();
         }
-
-        PDFLineSeparatorView lineSeparatorView2 = new PDFLineSeparatorView(getApplicationContext()).setBackgroundColor(Color.BLACK);
-        pdfBody.addView(lineSeparatorView2);
-
-        PDFTextView pdfFooterNoteView = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.SMALL);
-        pdfFooterNoteView.setText("Generated by InmunoApp - Using Latest Version");
-        pdfBody.addView(pdfFooterNoteView);
-
-        return pdfBody;
     }
-
-    @Override
-    protected PDFFooterView getFooterView(int pageIndex) {
-        PDFFooterView footerView = new PDFFooterView(getApplicationContext());
-
-        PDFTextView pdfTextViewPage = new PDFTextView(getApplicationContext(), PDFTextView.PDF_TEXT_SIZE.SMALL);
-        pdfTextViewPage.setText(String.format(Locale.getDefault(), "Page: %d", pageIndex + 1));
-        pdfTextViewPage.setLayout(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT, 0));
-        pdfTextViewPage.getView().setGravity(Gravity.CENTER_HORIZONTAL);
-
-        footerView.addView(pdfTextViewPage);
-
-        return footerView;
-    }
-
-    @Nullable
-    @Override
-    protected PDFImageView getWatermarkView(int forPage) {
-        PDFImageView pdfImageView = new PDFImageView(getApplicationContext());
-
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                200, Gravity.CENTER);
-        pdfImageView.setLayoutParams(params);
-
-        pdfImageView.setImageResource(R.mipmap.ic_notification); // Ajustar según sea necesario
-        pdfImageView.setImageScale(ImageView.ScaleType.FIT_CENTER);
-        pdfImageView.getView().setAlpha(0.3F);
-
-        return pdfImageView;
-    }
-
-    @Override
-    protected void onNextClicked(final File savedPDFFile) {
-        Uri pdfUri = Uri.fromFile(savedPDFFile);
-
-        Intent intentPdfViewer = new Intent(patientDetailActivity.this, PDFViewerActivity.class); // Ajustar el nombre de la actividad
-        intentPdfViewer.putExtra(PDFViewerActivity.PDF_FILE_URI, pdfUri);
-
-        startActivity(intentPdfViewer);
-    }
-
-
-    
 }
