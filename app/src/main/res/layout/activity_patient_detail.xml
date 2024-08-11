@@ -674,8 +674,35 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Aquí va el resultado de la BBDD"
+                        android:gravity="center"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:text="@string/aboutImmunotherapy"
                         android:textColor="@color/black"/>
+
+                    <TextView
+                        android:id="@+id/immDataTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:layout_marginTop="5dp"
+                        android:textColor="@color/black"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="16sp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/aboutToxicities"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/toxDataRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"/>
 
                     <Button
                         android:id="@+id/generatePDF"
@@ -684,7 +711,8 @@
                         android:text="@string/generateEHR"
                         android:textColor="@color/white"
                         android:backgroundTint="@color/bkgButton"
-                        android:layout_gravity="center"/>
+                        android:layout_gravity="center"
+                        android:layout_marginTop="10dp"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

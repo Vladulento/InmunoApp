@@ -161,7 +161,7 @@
     <string name="symptoms">Síntomas</string>
     <string name="addSymptoms">Escriba el nuevo síntoma a añadir</string>
     <string name="add">Añadir</string>
-    <string name="listedSymptoms">Los eventos adversos son: </string>
+    <string name="listedSymptoms">Las toxicidades son: </string>
     <string name="deleteSymptoms">Escriba el síntoma a eliminar</string>
     <string name="delete">Borrar</string>
 
@@ -182,7 +182,10 @@
     <string name="cardFreq">Frecuencia cardíaca</string>
     <string name="satOxygen">Saturación sanguínea</string>
 
-    <string name="generateEHR">Generar fichero pdf con formato EHR</string>
+    <string name="aboutImmunotherapy">Sobre la inmunoterapia del paciente</string>
+    <string name="aboutToxicities">Sobre las toxicidades del paciente</string>
+
+    <string name="generateEHR">Generar fichero pdf con formato HCE</string>
     
     // patientDetailActivity
     
@@ -218,4 +221,17 @@
     <string name="measure_alert_title">Alerta de %1$s</string>
     <string name="measure_alert_content">%1$s: %2$d fuera de rango en %3$s</string>
 
+    <string name="Endocrinopathy">Endocrinopatía</string>
+    <string name="GItoxicity">Toxicidad gastrointestinal</string>
+    <string name="Generalsymptoms">Síntomas generales</string>
+    <string name="Hepatotoxicity">Hepatotoxicidad</string>
+    <string name="Othertoxicities">Otras toxicidades</string>
+    <string name="Skintoxicity">Toxicidad cutánea</string>
+
+    // ToxAdapter
+
+    <string name="toxicity">Toxicidad: %s</string>
+    <string name="presentation">Presentación: %s</string>
+    <string name="baseline_monitoring">Monitoreo inicial: %s</string>
+    <string name="diagnosis">Diagnóstico: %s</string>
 </resources>

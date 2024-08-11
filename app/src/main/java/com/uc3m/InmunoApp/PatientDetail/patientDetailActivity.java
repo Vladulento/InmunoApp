@@ -11,6 +11,9 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
@@ -21,6 +24,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.graphics.Color;
+
+import android.net.Uri;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -49,13 +54,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+
+import java.nio.file.Files;
+
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -72,6 +80,11 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 
 public class patientDetailActivity extends AppCompatActivity {
     TextView immunotherapyTextView;
@@ -92,11 +105,13 @@ public class patientDetailActivity extends AppCompatActivity {
     private int selectedMeasure;
     private final Set<String> sentNotifications = new HashSet<>();
     private static final int REQUEST_CODE_PERMISSIONS = 1;
-    String name, gender, actualImmunotherapy, docName, docEmail;
+    String name, gender;
     int age, weight, height;
-    Integer docPhone;
-    ArrayList<String> adverseEvents = new ArrayList<>();
-    ArrayList<String> pastImmunotherapies = new ArrayList<>();
+    private RecyclerView recyclerViewTox;
+    String  patName, patGender, actualImmunotherapy, docName, docEmail;
+    Integer patAge, patHeight, patWeight, docPhone;
+    ArrayList<String> patTreatments = new ArrayList<>();
+    ArrayList<String> patToxicities = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +154,8 @@ public class patientDetailActivity extends AppCompatActivity {
         symptomsTextView = findViewById(R.id.symptomsTextView);
 
         Button buttonPDF = findViewById(R.id.generatePDF);
+
+        recyclerViewTox = findViewById(R.id.toxDataRecyclerView);
 
         // Establecer recursos
 
@@ -281,10 +298,7 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         }));
 
-        getClinicalData();
-        getDoctor1();
-
-        buttonPDF.setOnClickListener(v -> createPdf(patientDetailActivity.this));
+        buttonPDF.setOnClickListener(v -> createPdf());
 
         // Llamada a funciones
 
@@ -311,6 +325,7 @@ public class patientDetailActivity extends AppCompatActivity {
             notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1"));
         }
 
+        fetchPatientData();
     }
 
     @Override
@@ -1102,114 +1117,255 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void getClinicalData(){
-        adverseEvents.clear();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data");
-        reference.child("Adverse events").addValueEventListener(new ValueEventListener() {
+    private void createPdf() {
+        // Leer los datos del paciente 1
+        DatabaseReference personalRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1");
+        DatabaseReference clinicalRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data");
+        DatabaseReference doctorRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Oncology team contact").child("Doctor 1");
+        personalRoute.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                patName = dataSnapshot.child("Name").getValue(String.class);
+                patGender = dataSnapshot.child("Gender").getValue(String.class);
+                patAge = dataSnapshot.child("Age").getValue(Integer.class);
+                patHeight = dataSnapshot.child("Height").getValue(Integer.class);
+                patWeight = dataSnapshot.child("Weight").getValue(Integer.class);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("DatabaseError", databaseError.getMessage());
+            }
+        });
+
+        clinicalRoute.child("Adverse events").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String symptom = snapshot.getValue(String.class);
-                    adverseEvents.add(symptom);
+                    String toxicity = snapshot.getValue(String.class);
+                    patToxicities.add(toxicity);
                 }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle possible errors.
+                Log.e("DatabaseError", databaseError.getMessage());
             }
         });
-        reference.child("Treatment").addValueEventListener(new ValueEventListener() {
+
+        clinicalRoute.child("Treatment").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String treatment = snapshot.getValue(String.class);
-                    pastImmunotherapies.add(treatment);
+                    String immunotherapy = snapshot.getValue(String.class);
+                    patTreatments.add(immunotherapy);
                 }
-                actualImmunotherapy = pastImmunotherapies.get(pastImmunotherapies.size()-1);
-                pastImmunotherapies.remove(pastImmunotherapies.size()-1);
+                actualImmunotherapy = patTreatments.get(patTreatments.size() - 1);
+                patTreatments.remove(patTreatments.size() - 1);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle possible errors.
+                Log.e("DatabaseError", databaseError.getMessage());
             }
         });
-    }
 
-    private void getDoctor1(){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Oncology team contact").child("Doctor 1");
-
-        reference.addValueEventListener(new ValueEventListener() {
+        doctorRoute.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    docName = snapshot.child("Name").getValue(String.class);
-                    docEmail = snapshot.child("Mail").getValue(String.class);
-                    docPhone = snapshot.child("Phone").getValue(Integer.class);
-                }
+                docName = dataSnapshot.child("Name").getValue(String.class);
+                docEmail = dataSnapshot.child("Mail").getValue(String.class);
+                docPhone = dataSnapshot.child("Phone").getValue(Integer.class);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle possible errors.
+                Log.e("DatabaseError", databaseError.getMessage());
             }
         });
-    }
 
-    private void createPdf(Context context) {
+        // Creamos el pdf
+
         try {
-            // Ruta donde se guardará el PDF
-            File file = new File(context.getFilesDir(), "patient_info.pdf");
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            // Crear el archivo PDF
+            File pdfFile = new File(getExternalFilesDir(null), "HCE_" + patName + ".pdf");
+            PdfWriter writer = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                writer = new PdfWriter(Files.newOutputStream(pdfFile.toPath()));
+            }
+            assert writer != null;
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf, PageSize.A4);
 
-            // Inicializar el escritor de PDF
-            PdfWriter writer = new PdfWriter(fileOutputStream);
-            PdfDocument pdfDoc = new PdfDocument(writer);
-            Document document = new Document(pdfDoc);
+            // Ajuste del margen
+            document.setMargins(20, 20, 20, 20);
 
-            // Crear la tabla
-            float[] columnWidths = {1, 3};
-            Table table = new Table(columnWidths);
+            // Título centrado
+            Paragraph title = new Paragraph("Historia Clínica Electrónica (HCE)")
+                    .setFontSize(24)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(title);
 
-            // Añadir la información del paciente
-            table.addCell("Nombre:");
-            table.addCell(name);
-            table.addCell("Edad:");
-            table.addCell(String.valueOf(age));
-            table.addCell("Género:");
-            table.addCell(gender);
-            table.addCell("Altura:");
-            table.addCell(String.valueOf(height));
-            table.addCell("Peso:");
-            table.addCell(String.valueOf(weight));
+            // Subtítulo centrado
+            Paragraph subtitle = new Paragraph("Generado por ImmunoApp")
+                    .setFontSize(14)
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(subtitle);
 
-            // Añadir la información clínica
-            table.addCell("Inmunoterapia Actual:");
-            table.addCell(actualImmunotherapy);
-            table.addCell("Inmunoterapias Pasadas:");
-            table.addCell(String.valueOf(pastImmunotherapies));
-            table.addCell("Eventos Adversos:");
-            table.addCell(String.valueOf(adverseEvents));
+            document.add(new Paragraph("\n"));
 
-            // Añadir la información del equipo médico
-            table.addCell("Nombre del Médico:");
-            table.addCell(docName);
-            table.addCell("Correo del Médico:");
-            table.addCell(docEmail);
-            table.addCell("Teléfono del Médico:");
-            table.addCell(String.valueOf(docPhone));
-
-            // Añadir la tabla al documento
+            // Información personal
+            Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+            table.addCell(new Cell(1, 2).add(new Paragraph("Información Personal").setTextAlignment(TextAlignment.CENTER).setBold()));
+            table.addCell("Nombre");
+            table.addCell(patName);
+            table.addCell("Género");
+            table.addCell(patGender);
+            table.addCell("Edad");
+            table.addCell(String.valueOf(patAge));
+            table.addCell("Altura");
+            table.addCell(String.valueOf(patHeight));
+            table.addCell("Peso");
+            table.addCell(String.valueOf(patWeight));
             document.add(table);
 
-            // Cerrar el documento
+            document.add(new Paragraph("\n"));
+
+            // Información clínica
+            table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+            table.addCell(new Cell(1, 2).add(new Paragraph("Información Clínica").setTextAlignment(TextAlignment.CENTER).setBold()));
+            table.addCell("Inmunoterapia Actual");
+            table.addCell(actualImmunotherapy);
+            table.addCell("Inmunoterapias Pasadas");
+            table.addCell(patTreatments != null ? String.valueOf(patTreatments) : "Ninguno");
+            table.addCell("Toxicidades");
+            table.addCell(String.valueOf(patToxicities));
+            document.add(table);
+
+            document.add(new Paragraph("\n"));
+
+            // Información del equipo
+            table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+            table.addCell(new Cell(1, 2).add(new Paragraph("Información del Equipo").setTextAlignment(TextAlignment.CENTER).setBold()));
+            table.addCell("Nombre");
+            table.addCell(docName);
+            table.addCell("Correo");
+            table.addCell(docEmail);
+            table.addCell("Teléfono");
+            table.addCell(String.valueOf(docPhone));
+            document.add(table);
+
+            document.add(new Paragraph("\n"));
+
             document.close();
-            writer.close();
 
-            // Confirmación de creación
-            Toast.makeText(context, "PDF generado con éxito en: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            openPdf(pdfFile.getAbsolutePath());
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error al generar el PDF", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void openPdf(String path) {
+        File file = new File(path);
+        Uri uri = FileProvider.getUriForFile(this, "com.example.myapp.fileprovider", file);  // Reemplaza con tu nombre de paquete
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "application/pdf");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
+    }
+
+    public void fetchPatientData() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("patients").child("patient 1").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // Obtener el último tratamiento
+                String lastTreatmentKey = "";
+                for (DataSnapshot treatmentSnapshot : dataSnapshot.child("Medical information").child("Clinical data").child("Treatment").getChildren()) {
+                    lastTreatmentKey = treatmentSnapshot.getValue(String.class);
+                }
+
+                // Buscar en immunotherapies
+                databaseReference.child("immunotherapies").orderByChild("id").equalTo(lastTreatmentKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot immSnapshot) {
+                        if (immSnapshot.exists()) {
+                            Map<String, String> immData = new HashMap<>();
+                            for (DataSnapshot immChildSnapshot : immSnapshot.getChildren()) {
+                                // Almacenar datos de immunotherapies en el map
+                                immData.put(getString(R.string.Generalsymptoms), immChildSnapshot.child("General symptoms").getValue(String.class));
+                                immData.put(getString(R.string.Endocrinopathy), immChildSnapshot.child("Endocrinopathy").getValue(String.class));
+                                immData.put(getString(R.string.GItoxicity), immChildSnapshot.child("GI toxicity").getValue(String.class));
+                                immData.put(getString(R.string.Hepatotoxicity), immChildSnapshot.child("Hepatotoxicity").getValue(String.class));
+                                immData.put(getString(R.string.Skintoxicity), immChildSnapshot.child("Skin toxicity").getValue(String.class));
+                                immData.put(getString(R.string.Othertoxicities), immChildSnapshot.child("Oher toxicities").getValue(String.class));
+                            }
+                            // Mostrar la información en pantalla
+                            TextView textViewTImm = findViewById(R.id.immDataTextView);
+                            displayData(immData, textViewTImm);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Error al leer los datos
+                    }
+                });
+
+                // Obtener el último evento adverso
+                List<String> adverseEventKeys = new ArrayList<>();
+
+                recyclerViewTox.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                List<Map<String, String>> toxList = new ArrayList<>();
+                ToxAdapter adapter = new ToxAdapter(toxList);
+                recyclerViewTox.setAdapter(adapter);
+
+                for (DataSnapshot adverseEventSnapshot : dataSnapshot.child("Medical information").child("Clinical data").child("Adverse events").getChildren()) {
+                    String adverseEventKey = adverseEventSnapshot.getValue(String.class);
+                    if (adverseEventKey != null) {
+                        adverseEventKeys.add(adverseEventKey);
+                    }
+                }
+
+                // Buscar en tox para cada evento adverso
+                for (String adverseEventKey : adverseEventKeys) {
+                    databaseReference.child("toxicities").orderByChild("id").equalTo(adverseEventKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot toxSnapshot) {
+                            if (toxSnapshot.exists()) {
+                                Map<String, String> toxData = new HashMap<>();
+                                for (DataSnapshot toxChildSnapshot : toxSnapshot.getChildren()) {
+                                    toxData.put("Toxicidad", toxChildSnapshot.child("id").getValue(String.class));
+                                    toxData.put("Baseline monitoring", toxChildSnapshot.child("Baseline monitoring").getValue(String.class));
+                                    toxData.put("Diagnosis", toxChildSnapshot.child("Diagnosis").getValue(String.class));
+                                    toxData.put("Presentation", toxChildSnapshot.child("Presentation").getValue(String.class));
+                                }
+
+                                // Añadir datos al adaptador
+                                toxList.add(toxData);
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            // Manejar errores
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Error al leer los datos
+            }
+        });
+    }
+
+    public void displayData(Map<String, String> data, TextView textView) {
+        StringBuilder displayText = new StringBuilder();
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            displayText.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        textView.setText(displayText.toString());
     }
 }
