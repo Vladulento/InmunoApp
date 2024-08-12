@@ -16,6 +16,9 @@
         android:theme="@style/Theme.InmunoApp"
         tools:targetApi="31">
         <activity
+            android:name=".PatientDetail.ChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".PatientDetail.patientDetailActivity"
             android:exported="false" />
         <activity
@@ -36,15 +39,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.myapp.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
-        <meta-data
-            android:name="android.support.FILE_PROVIDER_PATHS"
-            android:resource="@xml/file_paths"/>
-    </provider>
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -186,9 +186,9 @@
     <string name="aboutToxicities">Sobre las toxicidades del paciente</string>
 
     <string name="generateEHR">Generar fichero pdf con formato HCE</string>
-    
+
     // patientDetailActivity
-    
+
     <string name="setHeightView">%1$d cm</string>
     <string name="setWeightView">%1$d kg</string>
     <string name="enterSymptom">Introduzca un valor antes para borrarlo</string>

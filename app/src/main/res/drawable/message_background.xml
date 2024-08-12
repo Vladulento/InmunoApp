@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Color de fondo semi-transparente -->
+    <solid android:color="#80000000"/> <!-- Gris semi-transparente -->
+
+    <!-- Esquinas redondeadas -->
+    <corners android:radius="16dp"/> <!-- Ajusta el radio según tu diseño -->
+
+    <!-- Opcional: Añadir borde -->
+    <stroke
+        android:width="1dp"
+        android:color="#c0c0c0"/> <!-- Color del borde (gris claro) -->
+</shape>

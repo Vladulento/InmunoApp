@@ -1,5 +1,6 @@
 package com.uc3m.InmunoApp.PatientDetail;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.uc3m.InmunoApp.R;
 
 import android.Manifest;
@@ -199,7 +200,17 @@ public class patientDetailActivity extends AppCompatActivity {
 
         // Botón de chat
         launchButton.setOnClickListener(v -> {
-            // do something
+            Intent chat = new Intent(patientDetailActivity.this, ChatActivity.class);
+            String email = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getEmail();
+            if(email != null && email.equals("100429327@alumnos.uc3m.es")){
+                chat.putExtra("currentUserEmail", "100429327@alumnos.uc3m.es");
+                chat.putExtra("otherUserEmail", name);
+            }else{
+                chat.putExtra("currentUserEmail", "vladrak11@gmail.com");
+                chat.putExtra("otherUserEmail", name);
+            }
+            chat.putExtra("chatId", "chatId1");
+            startActivity(chat);
         });
 
         // Encontrar el valor del spinner anterior

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".PatientDetail.ChatActivity"
+    android:background="@drawable/login_bkg">
+
+    <!-- Barra superior con el nombre del usuario y la flecha de retroceso -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarChat"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/bkgColor"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:contentInsetStart="0dp"
+        android:contentInsetEnd="0dp">
+
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:layout_marginStart="40dp"/>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- Lista de mensajes -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messagesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:orientation="vertical" />
+
+    <!-- Campo de entrada de mensaje y botón de enviar -->
+    <LinearLayout
+        android:id="@+id/messageInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/bkgColor"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/messageEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Escribe un mensaje"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:backgroundTint="@color/bkgNavigation"
+            android:textColor="@color/white"
+            android:text="Enviar" />
+    </LinearLayout>
+
+</LinearLayout>
