@@ -64,7 +64,6 @@ public class ChatActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Configurar el título del Toolbar
         TextView toolbarTitle = findViewById(R.id.toolbarTitle);
         toolbarTitle.setText(otherUserEmail);
 

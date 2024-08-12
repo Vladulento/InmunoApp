@@ -188,7 +188,7 @@ public class patientDetailActivity extends AppCompatActivity {
         setupLinearLayout(R.id.immunotherapyLayout, R.id.expandImmunotherapy);              // LinearLayouts
         setupLinearLayout(R.id.thresholdLayout, R.id.expandThreshold);
         setupLinearLayout(R.id.symptomsLayout, R.id.expandSymptoms);
-
+                                                                                            // Spinner para las gráficas
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this,
                 R.array.measuresTypes, android.R.layout.simple_spinner_item);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -196,7 +196,8 @@ public class patientDetailActivity extends AppCompatActivity {
 
         // Listeners
 
-        backButton.setOnClickListener(v -> onBackPressed());        // Botón de atrás
+        // Volver atrás
+        backButton.setOnClickListener(v -> onBackPressed());
 
         // Botón de chat
         launchButton.setOnClickListener(v -> {
@@ -213,11 +214,10 @@ public class patientDetailActivity extends AppCompatActivity {
             startActivity(chat);
         });
 
-        // Encontrar el valor del spinner anterior
+        // Leer el valor del spinner de inmunoterapia
         immunoTherapySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Obtener el valor seleccionado
                 newTreatment = parent.getItemAtPosition(position).toString();
             }
             @Override
@@ -241,6 +241,7 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         });
 
+        // Spinner de gráficas
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -265,6 +266,8 @@ public class patientDetailActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Botón de fecha inicial para la gráfica
+
         buttonStartDate.setOnClickListener(v -> showDatePickerDialog((date) -> {
             startDate = date;
 
@@ -287,6 +290,7 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         }));
 
+        // Botón de fecha final para la gráfica
         buttonEndDate.setOnClickListener(v -> showDatePickerDialog((date) -> {
             endDate = date;
 
@@ -309,6 +313,7 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         }));
 
+        // Botón para generar PDF
         buttonPDF.setOnClickListener(v -> createPdf());
 
         // Llamada a funciones
@@ -323,6 +328,7 @@ public class patientDetailActivity extends AppCompatActivity {
 
         getSymptomsP1();        // Leer los síntomas del paciente 1
 
+        // Notificaciones de alerta con permisos
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -336,9 +342,11 @@ public class patientDetailActivity extends AppCompatActivity {
             notificationListener(FirebaseDatabase.getInstance().getReference("patients").child("patient 1"));
         }
 
+        // Mostrar los datos de toxicidades e inmunoterapia mediante Map con la BBDD
         fetchPatientData();
     }
 
+    // Solicitud de los permisos para las notificaciones.
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
@@ -608,6 +616,7 @@ public class patientDetailActivity extends AppCompatActivity {
             newChild.setValue(symptom).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Log.d("DatabaseError", "New child added successfully.");
+                    fetchPatientData();
                 } else {
                     Log.e("DatabaseError", "Failed to add new child.", task.getException());
                 }
@@ -662,6 +671,7 @@ public class patientDetailActivity extends AppCompatActivity {
                         childSnapshot.getRef().removeValue().addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 Toast.makeText(getApplicationContext(), R.string.deletedSymptom, Toast.LENGTH_SHORT).show();
+                                fetchPatientData();
                             } else {
                                 Toast.makeText(getApplicationContext(), R.string.notDeletedSymptom, Toast.LENGTH_SHORT).show();
                             }
@@ -681,6 +691,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Listener para detectar cuando un valor de la medida debe generar una notificación
     private void notificationListener(DatabaseReference patientRef) {
         DatabaseReference measuresRef = patientRef.child("Measures");
         DatabaseReference marginsRef = patientRef.child("Medical information").child("Vital sign margins");
@@ -710,6 +721,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Función para generar la notificación
     private void addMeasureListener(DatabaseReference measureRef, double min, double max, String measureType) {
         measureRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -763,6 +775,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Función para generar la notificación de temperatura especificamente
     private void addTemperatureListener(DatabaseReference measureRef, double max) {
         measureRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -814,6 +827,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Función para mostrar el calendario en las gráficas
     private void showDatePickerDialog(OnDateSelectedListener listener) {
         // Obtener la fecha actual
         final Calendar calendar = Calendar.getInstance();
@@ -836,6 +850,7 @@ public class patientDetailActivity extends AppCompatActivity {
         void onDateSelected(String date);
     }
 
+    // Función para generar la gráfica en función del label
    private void plotMeasure(DatabaseReference reference, String startDate, String endDate, String label) {
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -909,6 +924,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Función para generar la gráfica de presión arterial, debido a que tiene dos valores
     private void plotBloodPressure(DatabaseReference reference, String startDate, String endDate, String label){
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -990,6 +1006,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Mostrar por pantalla los síntomas del paciente 1 que se repitan más de 3 veces, y la media diaria de deposiciones
     private void printSymptoms(String startDate, String endDate){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures").child("Sympthoms");
         reference.addValueEventListener(new ValueEventListener() {
@@ -1123,11 +1140,12 @@ public class patientDetailActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Manejo de errores
+                Log.e("DatabaseError", databaseError.getMessage());
             }
         });
     }
 
+    // Función para generar el PDF de la HCE
     private void createPdf() {
         // Leer los datos del paciente 1
         DatabaseReference personalRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1");
@@ -1192,8 +1210,6 @@ public class patientDetailActivity extends AppCompatActivity {
                 Log.e("DatabaseError", databaseError.getMessage());
             }
         });
-
-        // Creamos el pdf
 
         try {
             // Crear el archivo PDF
@@ -1276,6 +1292,7 @@ public class patientDetailActivity extends AppCompatActivity {
         }
     }
 
+    // Función para abrir el PDF
     private void openPdf(String path) {
         File file = new File(path);
         Uri uri = FileProvider.getUriForFile(this, "com.example.myapp.fileprovider", file);  // Reemplaza con tu nombre de paquete
@@ -1285,6 +1302,7 @@ public class patientDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // Función para mostrar por pantalla la información relevante en función de la inmunoterapia y los eventos adversos
     public void fetchPatientData() {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("patients").child("patient 1").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -1372,6 +1390,7 @@ public class patientDetailActivity extends AppCompatActivity {
         });
     }
 
+    // Función para mostrar por pantalla la información relevante mencionada
     public void displayData(Map<String, String> data, TextView textView) {
         StringBuilder displayText = new StringBuilder();
         for (Map.Entry<String, String> entry : data.entrySet()) {
