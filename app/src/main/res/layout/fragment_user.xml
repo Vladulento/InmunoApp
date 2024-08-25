@@ -65,49 +65,6 @@
         android:text="@string/deleteAccount"
         android:textColor="@color/white"/>
 
-    <!-- CUSTOM SECTION -->
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:background="@color/gray"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:text="@string/personalAccount"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        android:textSize="20sp"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:text="@string/selectLanguage"
-            android:textColor="@color/white" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:background="@color/transparent"
-            android:text="Escoger entre español o inglés"
-            android:textColor="@color/white"/>
-    </LinearLayout>
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

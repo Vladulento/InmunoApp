@@ -39,7 +39,7 @@
     <string name="errorChangePassword">Las contraseñas no coinciden o están vacias</string>
     <string name="userNotRegistered">Usuario no registrado</string>
     <string name="changeEmailTitle">Cambio de correo electrónico</string>
-    <string name="writeNewEmail">Introduzca su nuevo correo electrónico</string>
+    <string name="writeNewEmail">Introduzca su nuevo email</string>
     <string name="confirmNewEmail">Confirma tu nuevo email</string>
     <string name="errorEmailChange">Los correos electrónicos no coinciden o tienen un formato inválido</string>
     <string name="current_email">Correo electrónico actual: %1$s</string>
@@ -159,10 +159,10 @@
     <string name="thresholdSuccessful">¡Valores cambiados con éxito!</string>
     <string name="changeThreshold">Guardar umbrales seleccionados</string>
     <string name="symptoms">Síntomas</string>
-    <string name="addSymptoms">Escriba el nuevo síntoma a añadir</string>
+    <string name="addSymptoms">Escriba la nueva toxicidad</string>
     <string name="add">Añadir</string>
     <string name="listedSymptoms">Las toxicidades son: </string>
-    <string name="deleteSymptoms">Escriba el síntoma a eliminar</string>
+    <string name="deleteSymptoms">Escriba la toxicidad a eliminar</string>
     <string name="delete">Borrar</string>
 
     <string name="selectMeasureType">Escoja primero el tipo:</string>
@@ -217,9 +217,9 @@
     <string name="wrongFormatDate">No hay valores entre las fechas escogidas</string>
     <string name="noPermission">Permiso no concedido, no se te enviarán notificaciones</string>
     <string name="temperature_alert_title">Alerta de Temperatura Alta</string>
-    <string name="temperature_alert_content">Temperatura: %1$.1f°C fuera de rango en %2$s</string>
+    <string name="temperature_alert_content">%1$s ha registrado una temperatura de %2$.1f°C el %3$s</string>
     <string name="measure_alert_title">Alerta de %1$s</string>
-    <string name="measure_alert_content">%1$s: %2$d fuera de rango en %3$s</string>
+    <string name="measure_alert_content">%1$s ha registrado un valor de %2$d para la %3$s el %4$s</string>
 
     <string name="Endocrinopathy">Endocrinopatía</string>
     <string name="GItoxicity">Toxicidad gastrointestinal</string>

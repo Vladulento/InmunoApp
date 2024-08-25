@@ -747,7 +747,7 @@ public class patientDetailActivity extends AppCompatActivity {
                         if (!sentNotifications.contains(notificationKey)) {
                             // Crear notificación
                             String contentTitle = getString(R.string.measure_alert_title, measureType);
-                            String contentText = getString(R.string.measure_alert_content, measureType, value, timestamp);
+                            String contentText = getString(R.string.measure_alert_content, name, value, measureType,  timestamp);
 
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(patientDetailActivity.this, channelId)
                                     .setSmallIcon(R.drawable.baseline_person_search_24) // Asegúrate de tener este recurso en tu proyecto
@@ -800,7 +800,7 @@ public class patientDetailActivity extends AppCompatActivity {
                         // Verificar si ya se ha enviado una notificación para este valor y timestamp
                         if (!sentNotifications.contains(notificationKey)) {
                             // Crear notificación
-                            String contentText = getString(R.string.temperature_alert_content, temperature, timestamp);
+                            String contentText = getString(R.string.temperature_alert_content,name, temperature, timestamp);
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(patientDetailActivity.this, channelId)
                                     .setSmallIcon(R.drawable.baseline_person_search_24) // Asegúrate de tener este recurso en tu proyecto
                                     .setContentTitle(getString(R.string.temperature_alert_title))
@@ -1151,6 +1151,8 @@ public class patientDetailActivity extends AppCompatActivity {
         DatabaseReference personalRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1");
         DatabaseReference clinicalRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Clinical data");
         DatabaseReference doctorRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Medical information").child("Oncology team contact").child("Doctor 1");
+        DatabaseReference measuresRoute = FirebaseDatabase.getInstance().getReference("patients").child("patient 1").child("Measures");
+
         personalRoute.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1175,6 +1177,7 @@ public class patientDetailActivity extends AppCompatActivity {
                     patToxicities.add(toxicity);
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("DatabaseError", databaseError.getMessage());
@@ -1191,6 +1194,7 @@ public class patientDetailActivity extends AppCompatActivity {
                 actualImmunotherapy = patTreatments.get(patTreatments.size() - 1);
                 patTreatments.remove(patTreatments.size() - 1);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e("DatabaseError", databaseError.getMessage());
@@ -1211,85 +1215,118 @@ public class patientDetailActivity extends AppCompatActivity {
             }
         });
 
-        try {
-            // Crear el archivo PDF
-            File pdfFile = new File(getExternalFilesDir(null), "HCE_" + patName + ".pdf");
-            PdfWriter writer = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                writer = new PdfWriter(Files.newOutputStream(pdfFile.toPath()));
+        // Recuperar y añadir las medidas al PDF
+        measuresRoute.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    // Crear el archivo PDF
+                    File pdfFile = new File(getExternalFilesDir(null), "HCE_" + patName + ".pdf");
+                    PdfWriter writer = null;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        writer = new PdfWriter(Files.newOutputStream(pdfFile.toPath()));
+                    }
+                    assert writer != null;
+                    PdfDocument pdf = new PdfDocument(writer);
+                    Document document = new Document(pdf, PageSize.A4);
+
+                    // Ajuste del margen
+                    document.setMargins(20, 20, 20, 20);
+
+                    // Título centrado
+                    Paragraph title = new Paragraph("Historia Clínica Electrónica (HCE)")
+                            .setFontSize(24)
+                            .setBold()
+                            .setTextAlignment(TextAlignment.CENTER);
+                    document.add(title);
+
+                    document.add(new Paragraph("\n"));
+
+                    // Información personal
+                    Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+                    table.addCell(new Cell(1, 2).add(new Paragraph("Información Personal").setTextAlignment(TextAlignment.CENTER).setBold()));
+                    table.addCell("Nombre");
+                    table.addCell(patName);
+                    table.addCell("Género");
+                    table.addCell(patGender);
+                    table.addCell("Edad");
+                    table.addCell(String.valueOf(patAge));
+                    table.addCell("Altura");
+                    table.addCell(String.valueOf(patHeight));
+                    table.addCell("Peso");
+                    table.addCell(String.valueOf(patWeight));
+                    document.add(table);
+
+                    document.add(new Paragraph("\n"));
+
+                    // Información clínica
+                    table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+                    table.addCell(new Cell(1, 2).add(new Paragraph("Información Clínica").setTextAlignment(TextAlignment.CENTER).setBold()));
+                    table.addCell("Inmunoterapia Actual");
+                    table.addCell(actualImmunotherapy);
+                    table.addCell("Inmunoterapias Pasadas");
+                    table.addCell(patTreatments != null ? String.valueOf(patTreatments) : "Ninguno");
+                    table.addCell("Toxicidades");
+                    table.addCell(String.valueOf(patToxicities));
+                    document.add(table);
+
+                    document.add(new Paragraph("\n"));
+
+                    // Información de medidas
+                    table = new Table(UnitValue.createPercentArray(5)).useAllAvailableWidth();
+                    table.addCell(new Cell(1, 5).add(new Paragraph("Últimas Nueve Medidas").setTextAlignment(TextAlignment.CENTER).setBold()));
+                    table.addCell("Fecha");
+                    table.addCell("Presión Arterial (SP/DP mmHg)");
+                    table.addCell("Frecuencia Respiratoria (resp/min)");
+                    table.addCell("Frecuencia Cardíaca (pulsos/min)");
+                    table.addCell("Saturación de Oxígeno (%)");
+
+                    for (int i = 1; i <= 9; i++) {
+                        String date = dataSnapshot.child("Blood pressure").child("Measure " + i).child("Timestampt").getValue(String.class);
+                        String bp = dataSnapshot.child("Blood pressure").child("Measure " + i).child("Value SP").getValue(Integer.class)
+                                + "/" + dataSnapshot.child("Blood pressure").child("Measure " + i).child("Value DP").getValue(Integer.class);
+                        String br = dataSnapshot.child("Breath rate").child("Measure " + i).child("Value").getValue(Integer.class).toString();
+                        String hr = dataSnapshot.child("Heart rate").child("Measure " + i).child("Value").getValue(Integer.class).toString();
+                        String os = dataSnapshot.child("Oxygen saturation").child("Measure " + i).child("Value").getValue(Integer.class).toString();
+
+                        table.addCell(date);
+                        table.addCell(bp);
+                        table.addCell(br);
+                        table.addCell(hr);
+                        table.addCell(os);
+                    }
+
+                    document.add(table);
+
+                    document.add(new Paragraph("\n"));
+
+                    // Información del equipo
+                    table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+                    table.addCell(new Cell(1, 2).add(new Paragraph("Información del Equipo").setTextAlignment(TextAlignment.CENTER).setBold()));
+                    table.addCell("Nombre");
+                    table.addCell(docName);
+                    table.addCell("Correo");
+                    table.addCell(docEmail);
+                    table.addCell("Teléfono");
+                    table.addCell(String.valueOf(docPhone));
+                    document.add(table);
+
+                    document.add(new Paragraph("\n"));
+
+                    document.close();
+
+                    openPdf(pdfFile.getAbsolutePath());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            assert writer != null;
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf, PageSize.A4);
 
-            // Ajuste del margen
-            document.setMargins(20, 20, 20, 20);
-
-            // Título centrado
-            Paragraph title = new Paragraph("Historia Clínica Electrónica (HCE)")
-                    .setFontSize(24)
-                    .setBold()
-                    .setTextAlignment(TextAlignment.CENTER);
-            document.add(title);
-
-            // Subtítulo centrado
-            Paragraph subtitle = new Paragraph("Generado por ImmunoApp")
-                    .setFontSize(14)
-                    .setTextAlignment(TextAlignment.CENTER);
-            document.add(subtitle);
-
-            document.add(new Paragraph("\n"));
-
-            // Información personal
-            Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
-            table.addCell(new Cell(1, 2).add(new Paragraph("Información Personal").setTextAlignment(TextAlignment.CENTER).setBold()));
-            table.addCell("Nombre");
-            table.addCell(patName);
-            table.addCell("Género");
-            table.addCell(patGender);
-            table.addCell("Edad");
-            table.addCell(String.valueOf(patAge));
-            table.addCell("Altura");
-            table.addCell(String.valueOf(patHeight));
-            table.addCell("Peso");
-            table.addCell(String.valueOf(patWeight));
-            document.add(table);
-
-            document.add(new Paragraph("\n"));
-
-            // Información clínica
-            table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
-            table.addCell(new Cell(1, 2).add(new Paragraph("Información Clínica").setTextAlignment(TextAlignment.CENTER).setBold()));
-            table.addCell("Inmunoterapia Actual");
-            table.addCell(actualImmunotherapy);
-            table.addCell("Inmunoterapias Pasadas");
-            table.addCell(patTreatments != null ? String.valueOf(patTreatments) : "Ninguno");
-            table.addCell("Toxicidades");
-            table.addCell(String.valueOf(patToxicities));
-            document.add(table);
-
-            document.add(new Paragraph("\n"));
-
-            // Información del equipo
-            table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
-            table.addCell(new Cell(1, 2).add(new Paragraph("Información del Equipo").setTextAlignment(TextAlignment.CENTER).setBold()));
-            table.addCell("Nombre");
-            table.addCell(docName);
-            table.addCell("Correo");
-            table.addCell(docEmail);
-            table.addCell("Teléfono");
-            table.addCell(String.valueOf(docPhone));
-            document.add(table);
-
-            document.add(new Paragraph("\n"));
-
-            document.close();
-
-            openPdf(pdfFile.getAbsolutePath());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("DatabaseError", databaseError.getMessage());
+            }
+        });
     }
 
     // Función para abrir el PDF
@@ -1301,6 +1338,7 @@ public class patientDetailActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(intent);
     }
+
 
     // Función para mostrar por pantalla la información relevante en función de la inmunoterapia y los eventos adversos
     public void fetchPatientData() {

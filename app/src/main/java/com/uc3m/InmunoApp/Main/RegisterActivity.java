@@ -1,7 +1,9 @@
 package com.uc3m.InmunoApp.Main;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import android.content.Intent;
@@ -12,6 +14,7 @@ import android.util.Patterns;
 
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -34,6 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private boolean isPasswordVisible = false;
     private boolean isConfirmPasswordVisible = false;
+    private CheckBox termsCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,8 @@ public class RegisterActivity extends AppCompatActivity {
         Button btn = findViewById(R.id.registerButton);
         Button btnLogin = findViewById(R.id.goLoginButton);
 
+        termsCheckBox = findViewById(R.id.termsCheckBox);
+
         // Establecer el icono inicial de visibilidad de la contraseña
         passwordTextInputLayout.setEndIconDrawable(R.drawable.hide_password_layer);
         confirmPasswordTextInputLayout.setEndIconDrawable(R.drawable.hide_password_layer);
@@ -86,6 +92,13 @@ public class RegisterActivity extends AppCompatActivity {
             } else {
                 patientFields.setVisibility(View.GONE);
             }
+        });
+
+        termsCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                showTermsDialog();
+            }
+            btn.setEnabled(isChecked);
         });
     }
 
@@ -233,5 +246,31 @@ public class RegisterActivity extends AppCompatActivity {
         }
         isConfirmPasswordVisible = !isConfirmPasswordVisible;
         confirmPasswordTextView.setSelection(Objects.requireNonNull(confirmPasswordTextView.getText()).length());
+    }
+
+    private void showTermsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Términos y Condiciones")
+                .setMessage("Al utilizar esta aplicación, usted acepta que los datos ingresados " +
+                        "serán tratados con estricta confidencialidad y conforme a las normativas " +
+                        "vigentes de protección de datos personales. La aplicación tiene como " +
+                        "propósito asistir en el seguimiento de la inmunoterapia, pero no sustituye " +
+                        "el consejo médico profesional. Los usuarios asumen la responsabilidad del " +
+                        "uso de la aplicación y la interpretación de la información proporcionada. " +
+                        "La aplicación no se responsabiliza por decisiones clínicas basadas en sus " +
+                        "resultados.")
+                .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Aquí puedes manejar cualquier acción adicional si es necesario
+                    }
+                })
+                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        termsCheckBox.setChecked(false);
+                    }
+                })
+                .show();
     }
 }
